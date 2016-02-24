@@ -135,6 +135,30 @@ ClientSocket.cpp.s:
 	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/ClientSocket.cpp.s
 .PHONY : ClientSocket.cpp.s
 
+HTTPPacket.o: HTTPPacket.cpp.o
+.PHONY : HTTPPacket.o
+
+# target to build an object file
+HTTPPacket.cpp.o:
+	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/HTTPPacket.cpp.o
+.PHONY : HTTPPacket.cpp.o
+
+HTTPPacket.i: HTTPPacket.cpp.i
+.PHONY : HTTPPacket.i
+
+# target to preprocess a source file
+HTTPPacket.cpp.i:
+	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/HTTPPacket.cpp.i
+.PHONY : HTTPPacket.cpp.i
+
+HTTPPacket.s: HTTPPacket.cpp.s
+.PHONY : HTTPPacket.s
+
+# target to generate assembly for a file
+HTTPPacket.cpp.s:
+	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/HTTPPacket.cpp.s
+.PHONY : HTTPPacket.cpp.s
+
 Options.o: Options.cpp.o
 .PHONY : Options.o
 
@@ -219,6 +243,9 @@ help:
 	@echo "... ClientSocket.o"
 	@echo "... ClientSocket.i"
 	@echo "... ClientSocket.s"
+	@echo "... HTTPPacket.o"
+	@echo "... HTTPPacket.i"
+	@echo "... HTTPPacket.s"
 	@echo "... Options.o"
 	@echo "... Options.i"
 	@echo "... Options.s"

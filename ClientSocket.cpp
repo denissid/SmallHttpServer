@@ -49,7 +49,7 @@ void ClientSocket::WritePacket (Buffer& buffer)
 	{
 		offset += size;
 		size = send (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-		 cout << "Size send" << buffer << size << endl;
+	//	cout << "Size send" << buffer << size << endl;
 	}
 	while(offset<buffer.size() && size>0);
 }

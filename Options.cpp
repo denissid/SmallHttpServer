@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-Options::Options(int argc, char** argv): m_ipAddress("127.0.0.1"),m_port(2000),m_directory("/")
+Options::Options(int argc, char** argv): m_ipAddress("127.0.0.1"),m_port(2000),m_directory("/home/denis/Stepick/Final")
 {
 	using namespace std;
 
