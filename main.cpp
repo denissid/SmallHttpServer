@@ -25,7 +25,7 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 
 int main (int argc, char** argv)
 {
-	//TestGETParse();
+	TestGETParse();
 	using namespace std;
 
 	Options options(argc, argv);
