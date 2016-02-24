@@ -14,7 +14,6 @@ void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
 	size_t k = s.find(" ");
 	string typeCommand = s.substr(b, k-b);
 	//cout <<"type command "<< typeCommand << endl;
-	
 	packet.AddParam("command", typeCommand);
 	
 	k = k+1;//move after space 
@@ -38,7 +37,12 @@ void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
 
 void HTTPPacket::CreatePost404 (Buffer& buffer)
 {
-	static const std::string  not_found = "HTTP/1.0 404 NOT FOUND\r\nContent-Type: text/html\r\n\r\n";
+	static const std::string  not_found = "Content-Type: text/html\r\n"
+						"Content-length: 107\r\n"
+						"Connection: close\r\n"
+						"<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p>"
+						"</body></html>";
+
 	buffer = not_found;
 }
 
