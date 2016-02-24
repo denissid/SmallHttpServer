@@ -207,6 +207,30 @@ Server.cpp.s:
 	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/Server.cpp.s
 .PHONY : Server.cpp.s
 
+ThreadSafeStack.o: ThreadSafeStack.cpp.o
+.PHONY : ThreadSafeStack.o
+
+# target to build an object file
+ThreadSafeStack.cpp.o:
+	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/ThreadSafeStack.cpp.o
+.PHONY : ThreadSafeStack.cpp.o
+
+ThreadSafeStack.i: ThreadSafeStack.cpp.i
+.PHONY : ThreadSafeStack.i
+
+# target to preprocess a source file
+ThreadSafeStack.cpp.i:
+	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/ThreadSafeStack.cpp.i
+.PHONY : ThreadSafeStack.cpp.i
+
+ThreadSafeStack.s: ThreadSafeStack.cpp.s
+.PHONY : ThreadSafeStack.s
+
+# target to generate assembly for a file
+ThreadSafeStack.cpp.s:
+	$(MAKE) -f CMakeFiles/final.dir/build.make CMakeFiles/final.dir/ThreadSafeStack.cpp.s
+.PHONY : ThreadSafeStack.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -252,6 +276,9 @@ help:
 	@echo "... Server.o"
 	@echo "... Server.i"
 	@echo "... Server.s"
+	@echo "... ThreadSafeStack.o"
+	@echo "... ThreadSafeStack.i"
+	@echo "... ThreadSafeStack.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

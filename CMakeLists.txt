@@ -6,9 +6,9 @@ set (CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_BINRY_DIR})
 set (LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set (SOURCES_FILES main.cpp Options.h Options.cpp Server.h Server.cpp ClientSocket.h ClientSocket.cpp
-		   HTTPPacket.h HTTPPacket.cpp DaemonHelper.h Worker.h )
+		   HTTPPacket.h HTTPPacket.cpp DaemonHelper.h Worker.h ThreadSafeStack.h ThreadSafeStack.cpp )
 
-set (CMAKE_CXX_FLAGS "-std=c++11")
+set (CMAKE_CXX_FLAGS "-std=c++11 -pthread")
 
 include_directories("${PROJECT_SOURCE_DIR}")
 

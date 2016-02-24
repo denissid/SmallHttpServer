@@ -103,7 +103,12 @@ int Server::WaitClients()
 				epoll_ctl(m_epoll, EPOLL_CTL_ADD, slaveSocket, &slaveEvent);
 			}
 			else
-			{
+			{	
+				epoll_event slaveEvent;
+				slaveEvent.data.fd = Events[i].data.fd;
+				slaveEvent.events = EPOLLIN;
+
+				epoll_ctl(m_epoll, EPOLL_CTL_DEL, Events[i].data.fd, &slaveEvent);
 				cout << "Start read slave socket" << endl;
 				return Events[i].data.fd;
 			}

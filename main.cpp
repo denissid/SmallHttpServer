@@ -9,10 +9,19 @@
 #include "DaemonHelper.h"
 #include "Tests.h"
 #include "Worker.h"
+#include "ThreadSafeStack.h"
 
 #include <vector>
 
-
+void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
+{
+	int i = 4;
+	while(i--)
+	{
+		std::thread thr(std::bind(Worker, std::ref(stack), folder));
+		thr.detach();
+	}
+}
 
 int main (int argc, char** argv)
 {
@@ -26,15 +35,17 @@ int main (int argc, char** argv)
 	cout << options.GetDirectory() << endl;
 	
 	MakeDaemon();
-
+	
+	ThreadSafeStack stack;
+	CreateThreads (stack, options.GetDirectory());
+	
 	Server server (options.GetIP(), options.GetPort());
 
-	int s = server.WaitClients();
-{
-	//thread thr;
-	//thr.join();
-	Worker (s, options.GetDirectory());
-}
+	do
+	{
+		int s = server.WaitClients();
+		stack.AddSocket(s);
+	}while(1);
 
 	return 0;
 }
