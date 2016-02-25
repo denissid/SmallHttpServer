@@ -2,16 +2,17 @@
 #include <stdlib.h>
 
 #include <thread>
+#include <vector>
+#include <exception>
 
 #include "Server.h"
-
 #include "Options.h"
 #include "DaemonHelper.h"
 #include "Tests.h"
 #include "Worker.h"
 #include "ThreadSafeStack.h"
+#include "Logger.h"
 
-#include <vector>
 
 void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
@@ -25,27 +26,39 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 
 int main (int argc, char** argv)
 {
-	TestGETParse();
+	//TestGETParse();
 	using namespace std;
 
-	Options options(argc, argv);
-
-	cout << options.GetIP() << endl;
-	cout << options.GetPort() << endl;
-	cout << options.GetDirectory() << endl;
-	
-	MakeDaemon();
-	
-	ThreadSafeStack stack;
-	CreateThreads (stack, options.GetDirectory());
-	
-	Server server (options.GetIP(), options.GetPort());
-
-	do
+	try
 	{
-		int s = server.WaitClients();
-		stack.AddSocket(s);
-	}while(1);
+		Options options(argc, argv);
+
+		cout << options.GetIP() << endl;
+		cout << options.GetPort() << endl;
+		cout << options.GetDirectory() << endl;
+		
+		MakeDaemon();
+		
+		ThreadSafeStack stack;
+		CreateThreads (stack, options.GetDirectory());
+		
+		Server server (options.GetIP(), options.GetPort());
+
+		do
+		{
+			int s = server.WaitClients();
+			stack.AddSocket(s);
+		}
+		while(1);
+	}
+	catch(std::exception& e)
+	{
+		cout << e.what() << endl;
+	}
+	catch (...)
+	{
+		cout << "Unknown exception" << endl;
+	}
 
 	return 0;
 }

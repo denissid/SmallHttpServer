@@ -13,6 +13,8 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include "Exceptions.h"
+
 using namespace std;
 
 namespace 
@@ -45,14 +47,14 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	//sockAddr.sin_addr.s_addr 
 	if (inet_pton(AF_INET, address.c_str(), &(sockAddr.sin_addr)) == 0)
 	{
-		cout << "Error conver ip address" << endl;
+		throw NetException("Error conver ip address");
 	}
 
 	cout << "Bind master socket" << endl;
 	int errb  = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
 	if (errb==-1)
 	{
-		perror("BIND ");
+		throw NetException("BIND error");
 	}
 	
 	set_nonblock(m_masterSocket);
@@ -64,7 +66,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	m_epoll = epoll_create1(0);
 	if (m_epoll==-1)
 	{
-		cout << "epoll create " << errno << endl;
+		throw NetException("Epoll create");
 	}
 	
 	cout << "Added master socket in epoll" << endl;
@@ -75,6 +77,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	if (err==-1)
 	{
 		cout << "epoll_ctl" << errno << endl;
+		throw NetException("Epoll_ctl create");
 	}
 }
 
@@ -87,6 +90,7 @@ int Server::WaitClients()
 		if (countEvents==-1)
 		{
 			perror("WaitClient ");
+			throw NetException("Epoll_wait create");
 			return -1;
 		}
 

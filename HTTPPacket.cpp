@@ -1,4 +1,7 @@
 #include "HTTPPacket.h"
+
+#include "Logger.h"
+
 #include <iostream>
 #include <sstream>
 
@@ -7,6 +10,9 @@ using namespace std;
 void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
 {
 	{
+	
+	WriteLog("Parse "+buffer);
+
 	size_t b = 0;
 	size_t i = buffer.find("\r\n");
 	string s = buffer.substr(b, i-b);
@@ -37,13 +43,14 @@ void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
 
 void HTTPPacket::CreatePost404 (Buffer& buffer)
 {
-	static const std::string  not_found = "Content-Type: text/html\r\n"
-						"Content-length: 107\r\n"
-						"Connection: close\r\n"
-						"<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p>"
-						"</body></html>";
-
-	buffer = not_found;
+	string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
+	stringstream ss;
+	ss << "HTTP/1.0 404 Not Found\r\n"
+	   << "Content-Type: text/html\r\n"
+	   <<  "Content-length: " << body.size() <<"\r\n"
+	   << "Connection: close\r\n" << body;
+	buffer = ss.str();
+	WriteLog("Create 404 "+buffer);
 }
 
 void HTTPPacket::CreatePost200(const std::string& dataFile, 
@@ -58,6 +65,7 @@ void HTTPPacket::CreatePost200(const std::string& dataFile,
 	   << dataFile; 
 
 	buffer = ss.str();
+	WriteLog("Create 200 "+buffer);
 }
 
 

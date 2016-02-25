@@ -3,6 +3,8 @@
 #include "ClientSocket.h"
 #include "HTTPPacket.h"
 #include "ThreadSafeStack.h"
+#include "Logger.h"
+#include "Exceptions.h"
 
 #include <iostream>
 #include <string>
@@ -11,15 +13,14 @@
 
 void Worker (const ThreadSafeStack& stack, const std::string& directory)
 {	
-
+	try
+	{
+	
 	using namespace std;
-
 	do
 	{
 		int socket = stack.GetSocket();
-		
-
-		{
+			
 		ClientSocket cs(socket);
 
 		Buffer buffer;
@@ -44,10 +45,11 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 			}
 			else
 			{
-				cout << "File wasn't founed "<< fullPath << endl;
+				cout << "File wasn't founded "<< fullPath << endl;
 				Buffer bufferError;
 				HTTPPacket::CreatePost404(bufferError);
 				cs.WritePacket (bufferError);
+				cout << bufferError << endl;
 			}
 		}
 		else
@@ -56,8 +58,14 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 			HTTPPacket::CreatePost404(bufferError);
 			cs.WritePacket (bufferError);
 		}
-		}
+	
 	}
 	while(1);
+
+	}
+	catch (...)
+	{
+		WriteLog ("Thread exception");
+	}
 
 }
