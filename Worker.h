@@ -63,6 +63,10 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 	while(1);
 
 	}
+	catch (const std::exception& exception)
+	{
+		WriteLog (std::string("Error packet ")+ exception.what());
+	}
 	catch (...)
 	{
 		WriteLog ("Thread exception");

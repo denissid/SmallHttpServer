@@ -20,26 +20,24 @@ ClientSocket::ClientSocket (int socket):m_socket(socket)
 
 void ClientSocket::ReadPacket(Buffer& buffer)
 {	
-	buffer.resize(1000);
+	buffer.resize(65535);
 	
 	int size = 0, offset = 0;
 	do
 	{
 		offset +=size;
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-	//	cout << " SIZE " << size <<" OFFSET "<< offset << endl;
 	}
 	while (size > 0);
 
-	if ( /*(size == 0) && */(errno != EAGAIN) )
+	if (size==-1 && errno!=EAGAIN)
 	{
-		CloseSocket();
+		cout << "Error socket " << (int)errno << endl;
+		perror("Error socket");
 	}
-	else
-	{
-		buffer.resize (offset);
-		//cout << (char*)&buffer[0];
-	}
+
+	cout << "Received size = " <<offset <<  endl;
+	buffer.resize (offset);
 }
 
 void ClientSocket::WritePacket (Buffer& buffer)
@@ -49,9 +47,13 @@ void ClientSocket::WritePacket (Buffer& buffer)
 	{
 		offset += size;
 		size = send (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-	//	cout << "Size send" << buffer << size << endl;
 	}
 	while(offset<buffer.size() && size>0);
+
+	if (size==-1)
+	{
+		cout << "Error socket " << (int)errno << endl;
+	}
 }
 
 void ClientSocket::CloseSocket()

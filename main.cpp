@@ -16,10 +16,12 @@
 
 void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
-	int i = 4;
+	using namespace std;
+	int i = thread::hardware_concurrency();
+	cout << "Count of threads " << i << endl;
 	while(i--)
 	{
-		std::thread thr(std::bind(Worker, std::ref(stack), folder));
+		thread thr(std::bind(Worker, std::ref(stack), folder));
 		thr.detach();
 	}
 }

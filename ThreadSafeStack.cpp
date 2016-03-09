@@ -14,13 +14,9 @@ void ThreadSafeStack::AddSocket(int i)
 int ThreadSafeStack::GetSocket() const
 {
 	unique_lock<mutex> lock (m_mutex);
-	cv.wait(lock);
+	cv.wait(lock, [this]{return !m_stack.empty();} );
 
-	if(!m_stack.empty())
-	{
-		int s = m_stack.top();
-		m_stack.pop();
-		return s;
-	}
-	return -1;
+	int s = m_stack.top();
+	m_stack.pop();
+	return s;
 }

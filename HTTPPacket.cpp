@@ -1,6 +1,7 @@
 #include "HTTPPacket.h"
 
 #include "Logger.h"
+#include "Exceptions.h"
 
 #include <iostream>
 #include <sstream>
@@ -15,29 +16,28 @@ void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
 
 	size_t b = 0;
 	size_t i = buffer.find("\r\n");
+	if (i==string::npos)
+		throw ParseException("doesn't find \r\n");
+
 	string s = buffer.substr(b, i-b);
 
 	size_t k = s.find(" ");
+	if (k==string::npos)
+		throw ParseException("doesn't find ' '");
+
 	string typeCommand = s.substr(b, k-b);
-	//cout <<"type command "<< typeCommand << endl;
 	packet.AddParam("command", typeCommand);
 	
 	k = k+1;//move after space 
 	size_t z = s.find_first_of(" ?",k);
+	if(z==string::npos)
+		throw ParseException("doesn't find ' ?'");
 	string path = s.substr(k, z-k);
+
 	//cout << "path " << path << endl;
 
 	packet.AddParam("path", path);
 	}
-
-/*	size_t i = string::npos, b = 0;
-	do 
-	{
-		i = buffer.find("\r\n");
-		cout << s << endl;
-	}
-	while (i!=string::npos);
-*/	
 }
 
 
