@@ -34,8 +34,6 @@ void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
 		throw ParseException("doesn't find ' ?'");
 	string path = s.substr(k, z-k);
 
-	//cout << "path " << path << endl;
-
 	packet.AddParam("path", path);
 	}
 }

@@ -47,7 +47,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	//sockAddr.sin_addr.s_addr 
 	if (inet_pton(AF_INET, address.c_str(), &(sockAddr.sin_addr)) == 0)
 	{
-		throw NetException("Error conver ip address");
+		throw NetException("Error convert ip address");
 	}
 
 	cout << "Bind master socket" << endl;

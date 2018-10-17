@@ -16,4 +16,8 @@ class Options
 		std::string GetIP() const;
 		int GetPort() const;
 		std::string GetDirectory() const;
+
+	private:
+		
+		void LoadConfig();
 };

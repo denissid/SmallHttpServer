@@ -4,6 +4,7 @@
 #include <thread>
 #include <vector>
 #include <exception>
+#include <functional>
 
 #include "Server.h"
 #include "Options.h"
