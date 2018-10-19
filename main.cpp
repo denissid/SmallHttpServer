@@ -40,7 +40,7 @@ int main (int argc, char** argv)
 		cout << options.GetPort() << endl;
 		cout << options.GetDirectory() << endl;
 		
-		MakeDaemon();
+	//	MakeDaemon();
 		
 		ThreadSafeStack stack;
 		CreateThreads (stack, options.GetDirectory());

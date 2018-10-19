@@ -78,7 +78,7 @@ void Options::LoadConfig()
 		file >> j;
 
 		m_ipAddress = j["address"];
-		//m_port = j["port"];
+		m_port = j["port"];
 		m_directory = j["directory"];
 	}
 	else

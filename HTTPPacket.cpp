@@ -56,7 +56,7 @@ void HTTPPacket::CreatePost200(const std::string& dataFile,
 {
 	stringstream ss;
 	ss << "HTTP/1.0 200 OK\r\n"
-	   << "Content-length: "<<dataFile.size()<<"\r\n"
+	   << "Content-length: " << dataFile.size() << "\r\n"
 	   << "Connection: close\r\n"
 	   << "Content-Type: text/html\r\n"
 	   << "\r\n"
