@@ -40,33 +40,32 @@ Packet HTTPPacket::Parse (Buffer& buffer)
 }
 
 
-Buffer HTTPPacket::CreatePost404 ()
-{
-	
-	string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
-	stringstream ss;
-	ss << "HTTP/1.0 404 Not Found\r\n"
-	   << "Content-Type: text/html\r\n"
-	   <<  "Content-length: " << body.size() <<"\r\n"
-	   << "Connection: close\r\n" << body;
-	Buffer buffer = ss.str();
-	WriteLog("Create 404 "+buffer);
-}
+
 
 Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
 {
-	stringstream ss;
-	ss << "HTTP/1.0 200 OK\r\n"
-	   << "Content-length: " << dataFile.size() << "\r\n"
-	   << "Connection: close\r\n"
-	   << "Content-Type: text/html\r\n"
-	   << "\r\n"
-	   << dataFile; 
+	Buffer buffer ("HTTP/1.0 200 OK\r\n");
 
-	Buffer buffer = ss.str();
+	buffer += "Content-length: " + to_string(dataFile.size()) + "\r\n"
+	+ "Connection: close\r\n"
+	+ "Content-Type: text/html\r\n"
+	+ "\r\n"
+	+ dataFile;
+ 
 	WriteLog("Create 200 "+buffer);
 
 	return buffer;
 }
 
+Buffer HTTPPacket::CreatePost404 ()
+{
+	
+	string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
+	string buffer ("HTTP/1.0 404 Not Found\r\n");
+		buffer += "Content-Type: text/html\r\n";
+	   	buffer += "Content-length: " + to_string(body.size()) + "\r\n";
+		buffer += "Connection: close\r\n" + body;
+	WriteLog("Create 404 "+buffer);
 
+	return buffer;
+}

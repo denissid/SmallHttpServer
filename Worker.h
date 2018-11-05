@@ -46,12 +46,14 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 			{
 				cout << "File wasn't founded "<< fullPath << endl;
 				Buffer bufferError = HTTPPacket::CreatePost404();
+
 				cs.WritePacket (bufferError);
 				cout << bufferError << endl;
 			}
 		}
 		else
 		{
+			cout << "Can't process command " << endl;
 			Buffer bufferError = HTTPPacket::CreatePost404();
 			cs.WritePacket (bufferError);
 		}

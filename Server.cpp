@@ -20,7 +20,7 @@ using namespace std;
 namespace 
 {
 
-	int set_nonblock(int fd)
+	int SetNonblock(int fd)
 	{
 		int flags=0;
 	#if defined(O_NONBLOCK)
@@ -31,6 +31,16 @@ namespace
 		flags = 1;
 		return ioctl(fd, FIOBIO, &flags);
 	#endif
+	}
+
+	void SetReuseSocket(int fd)
+	{
+		int reuse = 1;
+		int result = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+		if (reuse<0)
+		{
+			cout << "set socket option " << errno << endl;
+		}
 	}
 
 	const int max_events = 300;
@@ -44,11 +54,12 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	sockaddr_in sockAddr;
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(port);
-	//sockAddr.sin_addr.s_addr 
 	if (inet_pton(AF_INET, address.c_str(), &(sockAddr.sin_addr)) == 0)
 	{
 		throw NetException("Error convert ip address");
 	}
+
+	SetReuseSocket(m_masterSocket);
 
 	cout << "Bind master socket" << endl;
 	int errb  = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
@@ -57,7 +68,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 		throw NetException("BIND error");
 	}
 	
-	set_nonblock(m_masterSocket);
+	SetNonblock(m_masterSocket);
 
 	cout << "Make master socket listened" << endl;
 	listen (m_masterSocket, SOMAXCONN);
@@ -100,7 +111,7 @@ int Server::WaitClients()
 			{
 				cout << "Accept socket" << endl;
 				int slaveSocket = accept (m_masterSocket, 0, 0);
-				set_nonblock(slaveSocket);
+				SetNonblock(slaveSocket);
 				epoll_event slaveEvent;
 				slaveEvent.data.fd = slaveSocket;
 				slaveEvent.events = EPOLLIN;

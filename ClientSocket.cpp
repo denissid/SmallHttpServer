@@ -40,7 +40,7 @@ void ClientSocket::ReadPacket(Buffer& buffer)
 	buffer.resize (offset);
 }
 
-void ClientSocket::WritePacket (Buffer& buffer)
+void ClientSocket::WritePacket (const Buffer& buffer)
 {
 	int size = 0, offset = 0;
 	do
