@@ -27,8 +27,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 		cs.ReadPacket(buffer);
 		cout << buffer;
 
-		Packet packet;
-		HTTPPacket::Parse (buffer,packet);
+		Packet packet = HTTPPacket::Parse (buffer);
 		if (packet.IsGET())
 		{
 			string path = packet.GetPath();
@@ -37,25 +36,23 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 			fstream file (fullPath.c_str(), std::fstream::in);
 			if (file)
 			{
-				Buffer errMessage;
 				stringstream body;
 				body << file.rdbuf();
-				HTTPPacket::CreatePost200(body.str(),errMessage);
+
+				Buffer errMessage = HTTPPacket::CreatePost200(body.str());
 				cs.WritePacket (errMessage);
 			}
 			else
 			{
 				cout << "File wasn't founded "<< fullPath << endl;
-				Buffer bufferError;
-				HTTPPacket::CreatePost404(bufferError);
+				Buffer bufferError = HTTPPacket::CreatePost404();
 				cs.WritePacket (bufferError);
 				cout << bufferError << endl;
 			}
 		}
 		else
 		{
-			Buffer bufferError;
-			HTTPPacket::CreatePost404(bufferError);
+			Buffer bufferError = HTTPPacket::CreatePost404();
 			cs.WritePacket (bufferError);
 		}
 	

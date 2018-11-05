@@ -25,14 +25,14 @@ struct Packet
 		params.insert (std::make_pair(name,value));
 	}
 
-	std::string GetPath() 
+	std::string GetPath() const
 	{
-		return params["path"];
+		return params.at("path");
 	}
 	
-	bool IsGET() 
+	bool IsGET() const 
 	{
-		return std::string("GET")==params["command"]; 
+		return std::string("GET")==params.at("command"); 
 	}
 };
 
@@ -40,8 +40,8 @@ class HTTPPacket
 {
 	public:
 
-		static void Parse (Buffer& buffer, Packet& packet);
-		static void CreatePost200 (const std::string& dataFile, Buffer& buffer);
-		static void CreatePost404 (Buffer& buffer);
+		static Packet Parse (Buffer& buffer);
+		static Buffer CreatePost200 (const std::string& dataFile);
+		static Buffer CreatePost404 ();
 
 };

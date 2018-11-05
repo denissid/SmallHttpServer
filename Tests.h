@@ -12,8 +12,7 @@ void TestGETParse()
 			"Accept-Language: en-US,en;q=0.5\r\n"
 			"Accept-Encoding: gzip, deflate\r\n"
 			"Connection: keep-alive\r\n";
-	Packet packet;
-	HTTPPacket::Parse (buffer,packet);
+	Packet packet = HTTPPacket::Parse (buffer);
 	std::string path = packet.GetPath();
 	assert (path=="/index.html");
 	assert (packet.IsGET() == true);

@@ -8,10 +8,10 @@
 
 using namespace std;
 
-void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
+Packet HTTPPacket::Parse (Buffer& buffer)
 {
-	{
-	
+	Packet packet;
+
 	WriteLog("Parse "+buffer);
 
 	size_t b = 0;
@@ -35,24 +35,25 @@ void HTTPPacket::Parse (Buffer& buffer, Packet& packet)
 	string path = s.substr(k, z-k);
 
 	packet.AddParam("path", path);
-	}
+
+	return packet;
 }
 
 
-void HTTPPacket::CreatePost404 (Buffer& buffer)
+Buffer HTTPPacket::CreatePost404 ()
 {
+	
 	string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
 	stringstream ss;
 	ss << "HTTP/1.0 404 Not Found\r\n"
 	   << "Content-Type: text/html\r\n"
 	   <<  "Content-length: " << body.size() <<"\r\n"
 	   << "Connection: close\r\n" << body;
-	buffer = ss.str();
+	Buffer buffer = ss.str();
 	WriteLog("Create 404 "+buffer);
 }
 
-void HTTPPacket::CreatePost200(const std::string& dataFile, 
-				Buffer& buffer)
+Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
 {
 	stringstream ss;
 	ss << "HTTP/1.0 200 OK\r\n"
@@ -62,8 +63,10 @@ void HTTPPacket::CreatePost200(const std::string& dataFile,
 	   << "\r\n"
 	   << dataFile; 
 
-	buffer = ss.str();
+	Buffer buffer = ss.str();
 	WriteLog("Create 200 "+buffer);
+
+	return buffer;
 }
 
 

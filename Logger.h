@@ -19,8 +19,8 @@ static void WriteLog(const std::string& message)
 		auto time_t = chrono::system_clock::to_time_t(now);
 		auto local_time = std::localtime(&time_t);
 		auto time = put_time(local_time, "%F %T");
-		cout << time << " " <<   
-		m.count()
+		file << time << " ms " <<   
+		m.count() << setw(4)
 		<<" '"<< message << "' "<< endl;
 	}
 	else
