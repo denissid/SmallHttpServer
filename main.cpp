@@ -30,6 +30,8 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 int main (int argc, char** argv)
 {
 	//TestGETParse();
+	//TestSplit();
+
 	using namespace std;
 
 	try

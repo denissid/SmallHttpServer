@@ -25,7 +25,9 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
 		Buffer buffer;
 		cs.ReadPacket(buffer);
-		cout << buffer;
+
+		WriteLog ("Get command from client");
+		WriteLog(HTTPPacket::Split(buffer));
 
 		Packet packet = HTTPPacket::Parse (buffer);
 		if (packet.IsGET())
@@ -41,6 +43,9 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
 				Buffer errMessage = HTTPPacket::CreatePost200(body.str());
 				cs.WritePacket (errMessage);
+
+				WriteLog("Send message 200");
+				WriteLog(HTTPPacket::Split(errMessage));
 			}
 			else
 			{
@@ -48,6 +53,9 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 				Buffer bufferError = HTTPPacket::CreatePost404();
 
 				cs.WritePacket (bufferError);
+				
+				WriteLog("Send message 404");
+				WriteLog(HTTPPacket::Split(bufferError));
 				cout << bufferError << endl;
 			}
 		}
@@ -55,6 +63,9 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 		{
 			cout << "Can't process command " << endl;
 			Buffer bufferError = HTTPPacket::CreatePost404();
+
+			WriteLog("Send message 404");
+			WriteLog (HTTPPacket::Split(bufferError));
 			cs.WritePacket (bufferError);
 		}
 	

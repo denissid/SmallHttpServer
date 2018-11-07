@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Packet HTTPPacket::Parse (Buffer& buffer)
+Packet HTTPPacket::Parse (const Buffer& buffer)
 {
 	Packet packet;
 
@@ -16,22 +16,31 @@ Packet HTTPPacket::Parse (Buffer& buffer)
 
 	size_t b = 0;
 	size_t i = buffer.find("\r\n");
+
 	if (i==string::npos)
+	{
 		throw ParseException("doesn't find \r\n");
+	}
 
 	string s = buffer.substr(b, i-b);
 
 	size_t k = s.find(" ");
 	if (k==string::npos)
+	{
 		throw ParseException("doesn't find ' '");
+	}
 
 	string typeCommand = s.substr(b, k-b);
 	packet.AddParam("command", typeCommand);
 	
 	k = k+1;//move after space 
 	size_t z = s.find_first_of(" ?",k);
+
 	if(z==string::npos)
+	{
 		throw ParseException("doesn't find ' ?'");
+	}
+
 	string path = s.substr(k, z-k);
 
 	packet.AddParam("path", path);
@@ -39,8 +48,42 @@ Packet HTTPPacket::Parse (Buffer& buffer)
 	return packet;
 }
 
+std::vector<std::string> HTTPPacket::Split (const Buffer& buffer)
+{
+	using namespace std;
 
+	vector<string> splitted;
 
+	if (buffer.empty())
+	{
+		return splitted;
+	}
+
+	string::size_type pos = 0;
+
+	do
+	{
+		auto nextPos = buffer.find("\r\n", pos);
+		
+		if (nextPos == string::npos)
+		{
+			nextPos = buffer.size();
+		}
+
+		string t = buffer.substr(pos, nextPos-pos);
+		splitted.push_back(t);
+		
+		if (nextPos==buffer.size())
+		{
+			return splitted;
+		}
+
+		//move after \r\n
+		pos = nextPos + 2;
+	}
+	while(pos<buffer.size());
+	
+}
 
 Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
 {
@@ -52,7 +95,6 @@ Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
 	+ "\r\n"
 	+ dataFile;
  
-	WriteLog("Create 200 "+buffer);
 
 	return buffer;
 }
@@ -65,7 +107,6 @@ Buffer HTTPPacket::CreatePost404 ()
 		buffer += "Content-Type: text/html\r\n";
 	   	buffer += "Content-length: " + to_string(body.size()) + "\r\n";
 		buffer += "Connection: close\r\n" + body;
-	WriteLog("Create 404 "+buffer);
 
 	return buffer;
 }

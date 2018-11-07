@@ -48,7 +48,7 @@ namespace
 
 Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epoll(-1)
 {
-	cout << "Create master socket" << address <<":"<< port << endl;
+	cout << "Create master socket " << address <<":"<< port << endl;
 	m_masterSocket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	sockaddr_in sockAddr;
@@ -62,7 +62,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	SetReuseSocket(m_masterSocket);
 
 	cout << "Bind master socket" << endl;
-	int errb  = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
+	int errb = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
 	if (errb==-1)
 	{
 		throw NetException("BIND error");

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 typedef std::string Buffer;
 
@@ -40,7 +41,8 @@ class HTTPPacket
 {
 	public:
 
-		static Packet Parse (Buffer& buffer);
+		static Packet Parse (const Buffer& buffer);
+		static std::vector<std::string> Split (const Buffer& buffer);
 		static Buffer CreatePost200 (const std::string& dataFile);
 		static Buffer CreatePost404 ();
 
