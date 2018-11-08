@@ -19,7 +19,7 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
 	using namespace std;
 	int i = thread::hardware_concurrency();
-	cout << "Count of threads " << i << endl;
+	Log() << "Count of threads " << i << endl;
 	while(i--)
 	{
 		thread thr(std::bind(Worker, std::ref(stack), folder));
@@ -38,9 +38,9 @@ int main (int argc, char** argv)
 	{
 		Options options(argc, argv);
 
-		cout << options.GetIP() << endl;
-		cout << options.GetPort() << endl;
-		cout << options.GetDirectory() << endl;
+		Log() << options.GetIP() << endl;
+		Log() << options.GetPort() << endl;
+		Log() << options.GetDirectory() << endl;
 		
 	//	MakeDaemon();
 		
@@ -58,11 +58,11 @@ int main (int argc, char** argv)
 	}
 	catch(std::exception& e)
 	{
-		cout << e.what() << endl;
+		Log() << e.what() << endl;
 	}
 	catch (...)
 	{
-		cout << "Unknown exception" << endl;
+		Log() << "Unknown exception" << endl;
 	}
 
 	return 0;

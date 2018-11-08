@@ -8,6 +8,8 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+#include "Logger.h"
+
 Options::Options(int argc, char** argv): m_ipAddress("127.0.0.1"),m_port(2000),m_directory("/home/denis/Stepick/Final")
 {
 	using namespace std;
@@ -15,7 +17,7 @@ Options::Options(int argc, char** argv): m_ipAddress("127.0.0.1"),m_port(2000),m
 
 	LoadConfig();
 	
-	cout << "Options" << endl;
+	Log() << "Options" << endl;
 	int option = 0;
 	do {
 		option = getopt(argc, argv, "h:p:d:");
@@ -41,7 +43,7 @@ Options::Options(int argc, char** argv): m_ipAddress("127.0.0.1"),m_port(2000),m
 			}
 			case '?':
 			{
-				cout << "Error" << endl;
+				Log() << "Error" << endl;
 				break;
 			}
 		}
@@ -73,17 +75,20 @@ void Options::LoadConfig()
 	
 	if (file.is_open())
 	{
-		cout << endl << "Load config" << endl;
+		Log() << "Load config" << endl;
 		json j;
 		file >> j;
 
 		m_ipAddress = j["address"];
+		Log() << m_ipAddress << endl;
 		m_port = j["port"];
+		Log() << "port " << m_port << endl;
 		m_directory = j["directory"];
+		Log() << "directory:" << m_directory << endl;
 	}
 	else
 	{
-		cout << "config.json wasn't found" << endl;
+		Log() << "config.json wasn't found" << endl;
 	}
 }
 

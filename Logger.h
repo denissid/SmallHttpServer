@@ -42,26 +42,48 @@ class TimePrefix
 	}
 };
 
+class Logger 
+{
+	public:
+		Logger(): m_file("log.txt", std::fstream::in | std::fstream::out | std::fstream::app)
+		{
+			if (!m_file.is_open())
+			{
+				throw std::runtime_error("Error open file");
+			}
+		}
+
+		std::fstream& operator() ()
+		{
+			return m_file;
+		}
+
+	private:
+
+		std::fstream m_file;
+};
+
+static Logger logger;
+
+static std::fstream& Log()
+{
+	TimePrefix timePrefix;
+	logger() << timePrefix.GetStringTime() << " ";
+	return logger();
+}
+
 static void WriteLog(const std::string& message, bool isTimePrefix=true)
 {
 	using namespace std;
 
-	static fstream file ("log.txt", std::fstream::in | std::fstream::out | std::fstream::app);
-	if (file)
+	TimePrefix timePrefix;
+	if (isTimePrefix)
 	{
-		TimePrefix timePrefix;
-		if (isTimePrefix)
-		{
-			file << timePrefix.GetStringTime() <<" '"<< message << "' "<< endl;
-		}
-		else
-		{
-			file << setw(timePrefix.GetSize()) <<" '"<< message << "' "<< endl;
-		}
+		logger() << timePrefix.GetStringTime() <<" '"<< message << "' "<< endl;
 	}
 	else
 	{
-		cout << "Error open of log file" << endl;
+		logger() << setw(timePrefix.GetSize()) <<" '"<< message << "' "<< endl;
 	}
 }
 

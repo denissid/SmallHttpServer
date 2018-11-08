@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+#include "Logger.h"
 
 using namespace std;
 
@@ -32,11 +33,11 @@ void ClientSocket::ReadPacket(Buffer& buffer)
 
 	if (size==-1 && errno!=EAGAIN)
 	{
-		cout << "Error socket " << (int)errno << endl;
+		Log() << "Error socket " << (int)errno << endl;
 		perror("Error socket");
 	}
 
-	cout << "Received size = " <<offset <<  endl;
+	Log() << "Received size = " <<offset <<  endl;
 	buffer.resize (offset);
 }
 
@@ -52,7 +53,7 @@ void ClientSocket::WritePacket (const Buffer& buffer)
 
 	if (size==-1)
 	{
-		cout << "Error socket " << (int)errno << endl;
+		Log() << "Error socket " << (int)errno << endl;
 	}
 }
 
@@ -60,7 +61,7 @@ void ClientSocket::CloseSocket()
 {
 	if (m_socket !=-1)
 	{
-		std::cout << "Client Socket Closed" << std::endl;
+		Log() << "Client Socket Closed" << std::endl;
 		shutdown(m_socket, SHUT_RDWR);
 		close(m_socket);
 		m_socket = -1;
@@ -72,5 +73,4 @@ ClientSocket::~ClientSocket ()
 {
 	CloseSocket();
 }
-
 

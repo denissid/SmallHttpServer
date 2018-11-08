@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include "Exceptions.h"
+#include "Logger.h"
 
 using namespace std;
 
@@ -39,7 +40,7 @@ namespace
 		int result = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 		if (reuse<0)
 		{
-			cout << "set socket option " << errno << endl;
+			Log() << "set socket option " << errno << endl;
 		}
 	}
 
@@ -48,7 +49,7 @@ namespace
 
 Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epoll(-1)
 {
-	cout << "Create master socket " << address <<":"<< port << endl;
+	Log() << "Create master socket " << address <<":"<< port << endl;
 	m_masterSocket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	sockaddr_in sockAddr;
@@ -61,7 +62,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 
 	SetReuseSocket(m_masterSocket);
 
-	cout << "Bind master socket" << endl;
+	Log() << "Bind master socket" << endl;
 	int errb = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
 	if (errb==-1)
 	{
@@ -70,24 +71,24 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	
 	SetNonblock(m_masterSocket);
 
-	cout << "Make master socket listened" << endl;
+	Log() << "Make master socket listened" << endl;
 	listen (m_masterSocket, SOMAXCONN);
 	
-	cout << "Create epoll descriptor" << endl;
+	Log() << "Create epoll descriptor" << endl;
 	m_epoll = epoll_create1(0);
 	if (m_epoll==-1)
 	{
 		throw NetException("Epoll create");
 	}
 	
-	cout << "Added master socket in epoll" << endl;
+	Log() << "Added master socket in epoll" << endl;
 	epoll_event event;
 	event.data.fd = m_masterSocket;
 	event.events = EPOLLIN;
 	int err = epoll_ctl(m_epoll, EPOLL_CTL_ADD, m_masterSocket, &event);
 	if (err==-1)
 	{
-		cout << "epoll_ctl" << errno << endl;
+		Log() << "epoll_ctl" << errno << endl;
 		throw NetException("Epoll_ctl create");
 	}
 }
@@ -102,14 +103,13 @@ int Server::WaitClients()
 		{
 			perror("WaitClient ");
 			throw NetException("Epoll_wait create");
-			return -1;
 		}
 
 		for ( size_t i = 0; i<countEvents; ++i)
 		{
 			if (Events[i].data.fd == m_masterSocket)
 			{
-				cout << "Accept socket" << endl;
+				Log() << "Accept socket" << endl;
 				int slaveSocket = accept (m_masterSocket, 0, 0);
 				SetNonblock(slaveSocket);
 				epoll_event slaveEvent;
@@ -124,7 +124,7 @@ int Server::WaitClients()
 				slaveEvent.events = EPOLLIN;
 
 				epoll_ctl(m_epoll, EPOLL_CTL_DEL, Events[i].data.fd, &slaveEvent);
-				cout << "Start read slave socket" << endl;
+				Log() << "Start read slave socket" << endl;
 				return Events[i].data.fd;
 			}
 		}
@@ -140,10 +140,10 @@ Server::~Server ()
 	int err = epoll_ctl(m_epoll, EPOLL_CTL_DEL, m_masterSocket, &event);
 	if (err==-1)
 	{
-		cout << "epoll_ctl del" << errno << endl;
+		Log() << "epoll_ctl del" << errno << endl;
 	}
 
-	cout << "Master socket closed" << endl;
+	Log() << "Master socket closed" << endl;
 	close (m_masterSocket);
 }
 

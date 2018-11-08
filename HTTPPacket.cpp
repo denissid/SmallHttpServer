@@ -12,7 +12,8 @@ Packet HTTPPacket::Parse (const Buffer& buffer)
 {
 	Packet packet;
 
-	WriteLog("Parse "+buffer);
+	WriteLog("Parse ");
+	WriteLog(HTTPPacket::Split(buffer));
 
 	size_t b = 0;
 	size_t i = buffer.find("\r\n");

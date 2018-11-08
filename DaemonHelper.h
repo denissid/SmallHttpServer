@@ -3,6 +3,8 @@
 #include <iostream>
 #include <unistd.h>
 
+#include "Logger.h"
+
 void MakeDaemon()
 {
 	using namespace std;
@@ -10,11 +12,11 @@ void MakeDaemon()
 	int r = daemon(1,1);
 	if (r==1)
 	{
-		cout << "Error daemonise" << endl;
+		Log() << "Error daemonise" << endl;
 		return;
 	}
 
-	cout << "Launch daemon" << endl;
+	Log() << "Launch daemon" << endl;
 }
 
 
