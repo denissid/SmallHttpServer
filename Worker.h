@@ -41,11 +41,11 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 				stringstream body;
 				body << file.rdbuf();
 
-				Buffer errMessage = HTTPPacket::CreatePost200(body.str());
-				cs.WritePacket (errMessage);
+				Buffer message = HTTPPacket::CreatePost200(body.str());
+				cs.WritePacket (message);
 
 				WriteLog("Send message 200");
-				WriteLog(HTTPPacket::Split(errMessage));
+				//WriteLog(HTTPPacket::Split(message));
 			}
 			else
 			{
