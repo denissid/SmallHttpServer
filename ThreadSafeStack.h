@@ -20,9 +20,7 @@ class ThreadSafeStack
 		void AddSocket(int i);
 		int GetSocket() const ;
 
-		~ThreadSafeStack()
-		{
-		}
+		~ThreadSafeStack();
 
 	private:
 		ThreadSafeStack(const ThreadSafeStack&);

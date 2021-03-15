@@ -44,11 +44,13 @@ int main (int argc, char** argv)
 		
 	//	MakeDaemon();
 		
-		ThreadSafeStack stack;
-		CreateThreads (stack, options.GetDirectory());
-		
+
 		Server server (options.GetIP(), options.GetPort());
 
+		ThreadSafeStack stack;
+		CreateThreads (stack, options.GetDirectory());
+
+        this_thread::sleep_for(1s);
 		do
 		{
 			int s = server.WaitClients();

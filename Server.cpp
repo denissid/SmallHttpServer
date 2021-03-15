@@ -97,7 +97,7 @@ int Server::WaitClients()
 {
 	do
 	{
-		epoll_event Events[max_events];
+		epoll_event Events[max_events]={0};
 		const size_t countEvents = epoll_wait(m_epoll, Events, max_events, -1);
 		if (countEvents==-1)
 		{

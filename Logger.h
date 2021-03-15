@@ -42,6 +42,7 @@ class TimePrefix
 	}
 };
 
+
 class Logger 
 {
 	public:
@@ -72,6 +73,8 @@ static std::fstream& Log()
 	return logger();
 }
 
+#define OUTPUT_TO_SCREEN 1
+
 static void WriteLog(const std::string& message, bool isTimePrefix=true)
 {
 	using namespace std;
@@ -80,10 +83,19 @@ static void WriteLog(const std::string& message, bool isTimePrefix=true)
 	if (isTimePrefix)
 	{
 		logger() << timePrefix.GetStringTime() <<" '"<< message << "' "<< endl;
+#ifdef OUTPUT_TO_SCREEN 
+        std::cout << timePrefix.GetStringTime() <<" '"<< message << "' "<< endl;
+#endif
+
 	}
 	else
 	{
 		logger() << setw(timePrefix.GetSize()) <<" '"<< message << "' "<< endl;
+
+#ifdef OUTPUT_TO_SCREEN 
+        std::cout << setw(timePrefix.GetSize()) <<" '"<< message << "' "<< endl;
+#endif
+
 	}
 }
 

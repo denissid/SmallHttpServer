@@ -1,5 +1,9 @@
 #include "ThreadSafeStack.h"
+#include "Exceptions.h"
 
+#include <chrono>
+
+using namespace std::chrono_literals;
 using namespace std;
 
 void ThreadSafeStack::AddSocket(int i)
@@ -14,9 +18,19 @@ void ThreadSafeStack::AddSocket(int i)
 int ThreadSafeStack::GetSocket() const
 {
 	unique_lock<mutex> lock (m_mutex);
-	cv.wait(lock, [this]{return !m_stack.empty();} );
+	cv.wait_for(lock, 5s,[this]{return !m_stack.empty();} );
+
+    if (m_stack.empty())
+        return -1;
 
 	int s = m_stack.top();
 	m_stack.pop();
 	return s;
 }
+
+ThreadSafeStack::~ThreadSafeStack()
+{
+//	lock_guard<mutex> lock(m_mutex);
+//	cv.notify_all();
+}
+

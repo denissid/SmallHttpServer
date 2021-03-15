@@ -20,7 +20,12 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 	do
 	{
 		int socket = stack.GetSocket();
-			
+		
+        if (socket==-1)
+        {
+            continue;
+        }
+
 		ClientSocket cs(socket);
 
 		Buffer buffer;
@@ -75,7 +80,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 	}
 	catch (const std::exception& exception)
 	{
-		WriteLog (std::string("Error packet ")+ exception.what());
+		WriteLog (exception.what());
 	}
 	catch (...)
 	{

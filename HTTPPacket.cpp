@@ -84,6 +84,7 @@ std::vector<std::string> HTTPPacket::Split (const Buffer& buffer)
 	}
 	while(pos<buffer.size());
 	
+    return splitted;
 }
 
 Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
