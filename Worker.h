@@ -20,11 +20,8 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 	do
 	{
 		int socket = stack.GetSocket();
-		
         if (socket==-1)
-        {
             continue;
-        }
 
 		ClientSocket cs(socket);
 
@@ -32,24 +29,25 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 		cs.ReadPacket(buffer);
 
 		WriteLog ("Get command from client");
-		WriteLog(HTTPPacket::Split(buffer));
 
 		Packet packet = HTTPPacket::Parse (buffer);
 		if (packet.IsGET())
 		{
 			string path = packet.GetPath();
 			string fullPath = directory + path;
-			cout << fullPath <<endl;
+			cout << "open ' " << fullPath << "' " << endl;
+
 			fstream file (fullPath.c_str(), std::fstream::in);
 			if (file)
 			{
+
 				stringstream body;
 				body << file.rdbuf();
 
 				Buffer message = HTTPPacket::CreatePost200(body.str());
 				cs.WritePacket (message);
-
 				WriteLog("Send message 200");
+
 				//WriteLog(HTTPPacket::Split(message));
 			}
 			else

@@ -30,7 +30,5 @@ int ThreadSafeStack::GetSocket() const
 
 ThreadSafeStack::~ThreadSafeStack()
 {
-//	lock_guard<mutex> lock(m_mutex);
-//	cv.notify_all();
 }
 
