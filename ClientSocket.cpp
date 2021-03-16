@@ -19,8 +19,9 @@ ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
 }
 
-void ClientSocket::ReadPacket(Buffer& buffer)
+Buffer ClientSocket::ReadPacket() const
 {	
+    Buffer buffer;
 	buffer.resize(65535);
 	
 	int size = 0, offset = 0;
@@ -31,6 +32,7 @@ void ClientSocket::ReadPacket(Buffer& buffer)
 	}
 	while (size > 0);
 
+    //TODO EAGAIN is not processed
 	if (size==-1 && errno!=EAGAIN)
 	{
 		Log() << "Error socket " << (int)errno << endl;
@@ -39,6 +41,7 @@ void ClientSocket::ReadPacket(Buffer& buffer)
 
 	Log() << "Received size = " <<offset <<  endl;
 	buffer.resize (offset);
+    return buffer;
 }
 
 void ClientSocket::WritePacket (const Buffer& buffer)
@@ -51,6 +54,7 @@ void ClientSocket::WritePacket (const Buffer& buffer)
 	}
 	while(offset<buffer.size() && size>0);
 
+    //TODO EAGAIN is not processed
 	if (size==-1)
 	{
 		Log() << "Error socket " << (int)errno << endl;

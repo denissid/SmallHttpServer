@@ -6,17 +6,22 @@ typedef std::string Buffer;
 
 class ClientSocket
 {
-	int m_socket;
+	    int m_socket;
+
 	public:
 
 		ClientSocket (int socket);
 
-		void ReadPacket(Buffer& packet);
+		Buffer ReadPacket() const;
 		void WritePacket (const Buffer& packet);
 
 		~ClientSocket ();
 
+        ClientSocket(const ClientSocket&) = delete;
+        ClientSocket& operator= (const ClientSocket&) = delete;
+
 	private:
+        
 		void CloseSocket();
 };
 

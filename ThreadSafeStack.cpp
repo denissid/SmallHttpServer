@@ -3,15 +3,14 @@
 
 #include <chrono>
 
-using namespace std::chrono_literals;
 using namespace std;
+using namespace std::chrono_literals;
 
 void ThreadSafeStack::AddSocket(int i)
 {
 	lock_guard<mutex> lock(m_mutex);
 	
 	m_stack.push(i);
-	
 	cv.notify_one();
 }
 
@@ -30,5 +29,7 @@ int ThreadSafeStack::GetSocket() const
 
 ThreadSafeStack::~ThreadSafeStack()
 {
+    //there can be deadlock 
+    //in case of cv waiting 
 }
 

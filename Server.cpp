@@ -69,7 +69,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 		throw NetException("BIND error");
 	}
 	
-	SetNonblock(m_masterSocket);
+	//SetNonblock(m_masterSocket);
 
 	Log() << "Make master socket listened" << endl;
 	listen (m_masterSocket, SOMAXCONN);
@@ -105,6 +105,8 @@ int Server::WaitClients()
 			throw NetException("Epoll_wait create");
 		}
 
+        std::cout << "Count events" << countEvents << std::endl;
+
 		for ( size_t i = 0; i<countEvents; ++i)
 		{
 			if (Events[i].data.fd == m_masterSocket)
@@ -112,14 +114,15 @@ int Server::WaitClients()
 				Log() << "Accept socket" << endl;
 				int slaveSocket = accept (m_masterSocket, 0, 0);
 				SetNonblock(slaveSocket);
-				epoll_event slaveEvent;
+
+				epoll_event slaveEvent={0};
 				slaveEvent.data.fd = slaveSocket;
 				slaveEvent.events = EPOLLIN;
 				epoll_ctl(m_epoll, EPOLL_CTL_ADD, slaveSocket, &slaveEvent);
 			}
 			else
 			{	
-				epoll_event slaveEvent;
+				epoll_event slaveEvent = {0};
 				slaveEvent.data.fd = Events[i].data.fd;
 				slaveEvent.events = EPOLLIN;
 
@@ -134,7 +137,7 @@ int Server::WaitClients()
 
 Server::~Server ()
 {	
-	epoll_event event;
+	epoll_event event = {0};
 	event.data.fd = m_masterSocket;
 	event.events = EPOLLIN;
 	int err = epoll_ctl(m_epoll, EPOLL_CTL_DEL, m_masterSocket, &event);

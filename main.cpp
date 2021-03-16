@@ -5,6 +5,8 @@
 #include <vector>
 #include <exception>
 #include <functional>
+#include <signal.h>
+#include <atomic>
 
 #include "Server.h"
 #include "Options.h"
@@ -14,6 +16,12 @@
 #include "ThreadSafeStack.h"
 #include "Logger.h"
 
+extern std::atomic<bool> keep_thread_running;
+
+static void sig_handler(int )
+{
+    keep_thread_running = false;
+}
 
 void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
@@ -29,6 +37,7 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 
 int main (int argc, char** argv)
 {
+    signal(SIGINT, sig_handler);
 	//TestGETParse();
 	//TestSplit();
 
@@ -43,7 +52,6 @@ int main (int argc, char** argv)
 		Log() << options.GetDirectory() << endl;
 		
 	//	MakeDaemon();
-		
 
 		Server server (options.GetIP(), options.GetPort());
 
@@ -56,7 +64,7 @@ int main (int argc, char** argv)
 			int s = server.WaitClients();
 			stack.AddSocket(s);
 		}
-		while(1);
+		while(keep_thread_running);
 	}
 	catch(std::exception& e)
 	{

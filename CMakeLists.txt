@@ -7,7 +7,7 @@ set (EXECUTABLE_OUTPUT_PATH ${CMAKE_BINRY_DIR})
 set (LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set (SOURCES_FILES main.cpp Options.h Options.cpp Server.h Server.cpp ClientSocket.h ClientSocket.cpp
-	HTTPPacket.h HTTPPacket.cpp DaemonHelper.h Worker.h ThreadSafeStack.h ThreadSafeStack.cpp Logger.h Exceptions.h nlohmann/json.hpp )
+    HTTPPacket.h HTTPPacket.cpp DaemonHelper.h Worker.h Worker.cpp ThreadSafeStack.h ThreadSafeStack.cpp Logger.h Exceptions.h nlohmann/json.hpp )
 
 set (CMAKE_CXX_FLAGS "-std=c++14 -pthread")
 
