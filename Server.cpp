@@ -82,15 +82,9 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	}
 	
 	Log() << "Added master socket in epoll" << endl;
-	epoll_event event;
-	event.data.fd = m_masterSocket;
-	event.events = EPOLLIN;
-	int err = epoll_ctl(m_epoll, EPOLL_CTL_ADD, m_masterSocket, &event);
-	if (err==-1)
-	{
-		Log() << "epoll_ctl" << errno << endl;
-		throw NetException("Epoll_ctl create");
-	}
+
+    AddSocket(m_masterSocket);
+
 }
 
 int Server::WaitClients()
@@ -112,21 +106,15 @@ int Server::WaitClients()
 			if (Events[i].data.fd == m_masterSocket)
 			{
 				Log() << "Accept socket" << endl;
-				int slaveSocket = accept (m_masterSocket, 0, 0);
-				SetNonblock(slaveSocket);
+				int clientSocket = accept (m_masterSocket, 0, 0);
+				SetNonblock(clientSocket);
 
-				epoll_event slaveEvent={0};
-				slaveEvent.data.fd = slaveSocket;
-				slaveEvent.events = EPOLLIN;
-				epoll_ctl(m_epoll, EPOLL_CTL_ADD, slaveSocket, &slaveEvent);
+                AddSocket(clientSocket);
 			}
 			else
 			{	
-				epoll_event slaveEvent = {0};
-				slaveEvent.data.fd = Events[i].data.fd;
-				slaveEvent.events = EPOLLIN;
-
-				epoll_ctl(m_epoll, EPOLL_CTL_DEL, Events[i].data.fd, &slaveEvent);
+                DeleteSocket(Events[i].data.fd);
+                        
 				Log() << "Start read slave socket" << endl;
 				return Events[i].data.fd;
 			}
@@ -135,16 +123,37 @@ int Server::WaitClients()
 	while(1);
 }
 
-Server::~Server ()
+void Server::DeleteSocket (int socket)
 {	
-	epoll_event event = {0};
-	event.data.fd = m_masterSocket;
+    epoll_event event = {0};
+	event.data.fd = socket;
 	event.events = EPOLLIN;
-	int err = epoll_ctl(m_epoll, EPOLL_CTL_DEL, m_masterSocket, &event);
+	int err = epoll_ctl(m_epoll, EPOLL_CTL_DEL, socket, &event);
+
 	if (err==-1)
 	{
 		Log() << "epoll_ctl del" << errno << endl;
 	}
+
+}
+
+void Server::AddSocket (int socket)
+{	
+    epoll_event event={0};
+	event.data.fd = socket;
+	event.events = EPOLLIN;
+	int err = epoll_ctl(m_epoll, EPOLL_CTL_ADD, socket, &event);
+
+    if (err==-1)
+	{
+		Log() << "epoll_ctl add socket" << errno << endl;
+		throw NetException("Epoll_ctl create");
+	}
+}
+
+Server::~Server ()
+{	
+    DeleteSocket(m_masterSocket);
 
 	Log() << "Master socket closed" << endl;
 	close (m_masterSocket);

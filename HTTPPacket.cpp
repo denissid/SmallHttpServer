@@ -92,7 +92,7 @@ Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
 	Buffer buffer ("HTTP/1.0 200 OK\r\n");
 
 	buffer += "Content-length: " + to_string(dataFile.size()) + "\r\n"
-	+ "Connection: close\r\n"
+	+ "Connection: keep-alive\r\n"
 	+ "Content-Type: text/html\r\n"
 	+ "\r\n"
 	+ dataFile;
@@ -108,7 +108,7 @@ Buffer HTTPPacket::CreatePost404 ()
 	string buffer ("HTTP/1.0 404 Not Found\r\n");
 		buffer += "Content-Type: text/html\r\n";
 	   	buffer += "Content-length: " + to_string(body.size()) + "\r\n";
-		buffer += "Connection: close\r\n" + body;
+		buffer += "Connection: keep-alive\r\n" + body;
 
 	return buffer;
 }
