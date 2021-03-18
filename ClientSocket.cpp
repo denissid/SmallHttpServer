@@ -70,7 +70,6 @@ void ClientSocket::CloseSocket()
 		close(m_socket);
 		m_socket = -1;
 	}
-
 }
 
 ClientSocket::~ClientSocket ()

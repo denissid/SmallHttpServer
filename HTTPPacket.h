@@ -17,6 +17,12 @@ typedef std::string Buffer;
 	Accept-Encoding: gzip, deflate
 	Connection: keep-alive
 	*/
+namespace HTTPParams 
+{
+    static const std::string commnad = "command";
+    static const std::string connection = "connection";
+    static const std::string path = "path";
+}
 
 struct Packet
 {
@@ -33,7 +39,7 @@ struct Packet
 		return params.at("path");
 	}
 	
-	bool IsGET() const 
+	bool IsGETMethod() const 
 	{
 		return std::string("GET")==params.at("command"); 
 	}

@@ -21,7 +21,7 @@ void TestGETParse()
 	Packet packet = Parse (buffer);
 	string path = packet.GetPath();
 	assert (path=="/index.html");
-	assert (packet.IsGET() == true);
+	assert (packet.IsGETMethod() == true);
 }
 
 void TestExtract()
