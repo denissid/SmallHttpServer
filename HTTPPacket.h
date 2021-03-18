@@ -50,6 +50,10 @@ namespace HTTPPacket
         std::string extractField(const Buffer& buffer, const std::string &field);
 		Packet Parse (const Buffer& buffer);
 		std::vector<std::string> Split (const Buffer& buffer);
-		Buffer CreatePost200 (const std::string& dataFile);
-		Buffer CreatePost404 ();
-};
+}
+
+namespace HTTPResponses
+{
+		Buffer Create200 (const std::string& dataFile);
+		Buffer Create404 ();
+}

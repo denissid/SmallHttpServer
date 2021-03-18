@@ -48,7 +48,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
                     stringstream body;
                     body << file.rdbuf();
 
-                    Buffer message = HTTPPacket::CreatePost200(body.str());
+                    Buffer message = HTTPResponses::Create200(body.str());
                     cs.WritePacket (message);
 
                     WriteLog("Send message 200");
@@ -56,7 +56,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
                 else
                 {
                     cout << "File wasn't founded "<< fullPath << endl;
-                    Buffer bufferError = HTTPPacket::CreatePost404();
+                    Buffer bufferError = HTTPResponses::Create404();
 
                     cs.WritePacket (bufferError);
                     
@@ -67,7 +67,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
             else
             {
                 cout << "Can't process command " << endl;
-                Buffer bufferError = HTTPPacket::CreatePost404();
+                Buffer bufferError = HTTPResponses::Create404();
 
                 cs.WritePacket (bufferError);
 

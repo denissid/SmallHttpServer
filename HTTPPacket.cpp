@@ -115,7 +115,14 @@ std::vector<std::string> Split (const Buffer& buffer)
     return splitted;
 }
 
-Buffer CreatePost200(const std::string& dataFile)
+}
+
+namespace HTTPResponses
+{
+
+using namespace std;
+
+Buffer Create200(const std::string& dataFile)
 {
 	Buffer buffer ("HTTP/1.0 200 OK\r\n");
 
@@ -129,7 +136,7 @@ Buffer CreatePost200(const std::string& dataFile)
 	return buffer;
 }
 
-Buffer CreatePost404 ()
+Buffer Create404 ()
 {
 	
 	string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
