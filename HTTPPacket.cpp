@@ -6,50 +6,78 @@
 #include <iostream>
 #include <sstream>
 
+
+namespace HTTPPacket
+{
 using namespace std;
 
-Packet HTTPPacket::Parse (const Buffer& buffer)
+std::string extractField(const Buffer& buffer, const std::string &field)
+{
+    auto bCommand = buffer.find (field);
+    if (bCommand==string::npos)
+        return {};
+
+	auto bValue = buffer.find(" ", bCommand);
+	bValue = buffer.find_first_not_of(" ", bValue);
+
+    auto eValue = buffer.find("\r\n", bValue);
+    if (eValue==string::npos)
+    {
+        eValue = buffer.size();
+    }
+
+    return buffer.substr(bValue, eValue-bValue);
+}
+
+Packet Parse (const Buffer& buffer)
 {
 	Packet packet;
 
 	WriteLog("Parse ");
 	WriteLog(HTTPPacket::Split(buffer));
 
-	size_t b = 0;
+    //parse header example: GET /index.html HTTP/1.1
 	size_t i = buffer.find("\r\n");
 
 	if (i==string::npos)
 	{
-		throw ParseException("doesn't find \r\n");
+		throw ParseException("\r\n wasn't found");
 	}
 
-	string s = buffer.substr(b, i-b);
+	size_t b = 0;
+	string header = buffer.substr(b, i-b);
 
-	size_t k = s.find(" ");
+	size_t k = header.find(" ");
 	if (k==string::npos)
 	{
 		throw ParseException("doesn't find ' '");
 	}
 
-	string typeCommand = s.substr(b, k-b);
+    //extract commands (GET, POST ... ) 
+	string typeCommand = header.substr(b, k-b);
+
 	packet.AddParam("command", typeCommand);
 	
-	k = k+1;//move after space 
-	size_t z = s.find_first_of(" ?",k);
+	k++;//move after space 
+	size_t z = header.find_first_of(" ?", k);
 
-	if(z==string::npos)
+	if (z==string::npos)
 	{
 		throw ParseException("doesn't find ' ?'");
 	}
 
-	string path = s.substr(k, z-k);
-
+    //extract path 'index.html'
+	string path = header.substr(k, z-k);
 	packet.AddParam("path", path);
+
+    const std::string nameField = "connection";
+    string valueConnection = extractField(buffer, nameField);
+    packet.AddParam(nameField, valueConnection);
 
 	return packet;
 }
 
-std::vector<std::string> HTTPPacket::Split (const Buffer& buffer)
+std::vector<std::string> Split (const Buffer& buffer)
 {
 	using namespace std;
 
@@ -87,7 +115,7 @@ std::vector<std::string> HTTPPacket::Split (const Buffer& buffer)
     return splitted;
 }
 
-Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
+Buffer CreatePost200(const std::string& dataFile)
 {
 	Buffer buffer ("HTTP/1.0 200 OK\r\n");
 
@@ -101,7 +129,7 @@ Buffer HTTPPacket::CreatePost200(const std::string& dataFile)
 	return buffer;
 }
 
-Buffer HTTPPacket::CreatePost404 ()
+Buffer CreatePost404 ()
 {
 	
 	string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
@@ -111,4 +139,6 @@ Buffer HTTPPacket::CreatePost404 ()
 		buffer += "Connection: keep-alive\r\n" + body;
 
 	return buffer;
+}
+
 }

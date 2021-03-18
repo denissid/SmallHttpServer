@@ -6,10 +6,9 @@
 
 typedef std::string Buffer;
 
-
-struct Packet
-{
 	/*
+     * example of packet
+     *
 	GET /index.html HTTP/1.1
 	Host: 127.0.0.1:2000
 	User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0
@@ -18,7 +17,10 @@ struct Packet
 	Accept-Encoding: gzip, deflate
 	Connection: keep-alive
 	*/
-	std::map <std::string, std::string > params;
+
+struct Packet
+{
+	std::map <std::string, std::string> params;
 
 	void AddParam (const std::string& name, 
 			const std::string& value)
@@ -37,13 +39,11 @@ struct Packet
 	}
 };
 
-class HTTPPacket
+namespace HTTPPacket
 {
-	public:
-
-		static Packet Parse (const Buffer& buffer);
-		static std::vector<std::string> Split (const Buffer& buffer);
-		static Buffer CreatePost200 (const std::string& dataFile);
-		static Buffer CreatePost404 ();
-
+        std::string extractField(const Buffer& buffer, const std::string &field);
+		Packet Parse (const Buffer& buffer);
+		std::vector<std::string> Split (const Buffer& buffer);
+		Buffer CreatePost200 (const std::string& dataFile);
+		Buffer CreatePost404 ();
 };

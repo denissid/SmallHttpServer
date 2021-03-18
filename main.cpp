@@ -38,6 +38,8 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 int main (int argc, char** argv)
 {
     signal(SIGINT, sig_handler);
+
+    //TestExtract();
 	//TestGETParse();
 	//TestSplit();
 

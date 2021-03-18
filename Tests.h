@@ -16,30 +16,39 @@ Buffer buffer = "GET /index.html?a=5 HTTP/1.1\r\n"
 void TestGETParse()
 {	
 	using namespace std;
+    using namespace HTTPPacket;
 
-	Packet packet = HTTPPacket::Parse (buffer);
+	Packet packet = Parse (buffer);
 	string path = packet.GetPath();
 	assert (path=="/index.html");
 	assert (packet.IsGET() == true);
 }
 
+void TestExtract()
+{
+    auto field = HTTPPacket::extractField(buffer, "Connection");
+    std::cout << "'" << field << "'";
+    assert (field=="keep-alive");
+}
+
 void TestSplit()
 {
 	using namespace std;
+    using namespace HTTPPacket;
 
-	auto vec = HTTPPacket::Split (buffer);
+	auto vec = Split (buffer);
 	assert (vec.size()==7);
 
 	Buffer bufferOneLine = "String line \r\n";
-	auto v = HTTPPacket::Split (bufferOneLine);
+	auto v = Split (bufferOneLine);
 	assert (v.size()==1);
 
 	Buffer bufferTwoLine = "String line \r\n 12345";
-	auto v1 = HTTPPacket::Split (bufferTwoLine);
+	auto v1 = Split (bufferTwoLine);
 	assert (v1.size()==2);
 
 	Buffer bufferEndLine = "String line ";
-	auto v2 = HTTPPacket::Split (bufferEndLine);
+	auto v2 = Split (bufferEndLine);
 	assert (v2.size()==1);
 
 }

@@ -52,7 +52,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	Log() << "Create master socket " << address <<":"<< port << endl;
 	m_masterSocket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	sockaddr_in sockAddr;
+	sockaddr_in sockAddr = {0};
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(port);
 	if (inet_pton(AF_INET, address.c_str(), &(sockAddr.sin_addr)) == 0)

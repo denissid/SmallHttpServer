@@ -8,9 +8,10 @@ using namespace std::chrono_literals;
 
 void ThreadSafeStack::AddSocket(int i)
 {
-	lock_guard<mutex> lock(m_mutex);
-	
-	m_stack.push(i);
+    {
+	    lock_guard<mutex> lock(m_mutex);
+	    m_stack.push(i);
+    }
 	cv.notify_one();
 }
 
