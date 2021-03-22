@@ -15,6 +15,21 @@
 
 using namespace std;
 
+namespace
+{
+    bool IsEndPacket(const int offset, const Buffer &buffer)
+    { 
+        string endPacket = "\r\n\r\n";
+        auto eSize = endPacket.size();
+        if (offset>=eSize)
+        {
+            auto l = buffer.substr(offset-eSize, eSize);
+            return l==endPacket;
+        }
+        return false;
+    }
+}
+
 ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
 }
@@ -27,19 +42,27 @@ Buffer ClientSocket::ReadPacket() const
 	int size = 0, offset = 0;
 	do
 	{
-		offset +=size;
+		offset += size;
+
+        if (IsEndPacket(offset, buffer))
+        {
+            Log() << "stop read from socket" << std::endl;
+            break;
+        }
+
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-	}
+
+    }
 	while (size > 0);
 
     //TODO EAGAIN is not processed
-	if (size==-1 && errno!=EAGAIN)
+	if (size==-1 && errno==EAGAIN)
 	{
-		Log() << "Error socket " << (int)errno << endl;
+		Log() << "Error socket --> " << (int)errno << endl;
 		perror("Error socket");
 	}
 
-	Log() << "Received size = " <<offset <<  endl;
+	Log() << "Received offset = " <<offset <<  endl;
 	buffer.resize (offset);
     return buffer;
 }
@@ -63,7 +86,7 @@ void ClientSocket::WritePacket (const Buffer& buffer)
 
 void ClientSocket::CloseSocket()
 {
-	if (m_socket !=-1)
+	if (m_socket!=-1)
 	{
 		Log() << "Client Socket Closed" << std::endl;
 		shutdown(m_socket, SHUT_RDWR);

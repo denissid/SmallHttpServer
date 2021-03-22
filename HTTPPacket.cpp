@@ -33,6 +33,7 @@ Packet Parse (const Buffer& buffer)
 {
 	Packet packet;
 
+    std::cout << buffer; 
 	WriteLog("Parse ");
 	WriteLog(HTTPPacket::Split(buffer));
 

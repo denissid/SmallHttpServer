@@ -34,6 +34,21 @@ namespace
 	#endif
 	}
 
+	int SetBlock(int fd)
+	{
+		int flags=0;
+	#if defined(O_NONBLOCK)
+		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
+			flags = 0;
+        flags &= ~O_NONBLOCK;
+        Log() << "flags " << flags << std::endl;
+		return fcntl (fd, F_SETFL, flags);
+	#else
+		return ioctl(fd, FIOBIO, &flags);
+	#endif
+	}
+
+
 	void SetReuseSocket(int fd)
 	{
 		int reuse = 1;
@@ -69,7 +84,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 		throw NetException("BIND error");
 	}
 	
-	//SetNonblock(m_masterSocket);
+	SetNonblock(m_masterSocket);
 
 	Log() << "Make master socket listened" << endl;
 	listen (m_masterSocket, SOMAXCONN);
@@ -107,14 +122,14 @@ int Server::WaitClients()
 			{
 				Log() << "Accept socket" << endl;
 				int clientSocket = accept (m_masterSocket, 0, 0);
-				SetNonblock(clientSocket);
+				//SetNonblock(clientSocket);
 
                 AddSocket(clientSocket);
 			}
 			else
 			{	
                 DeleteSocket(Events[i].data.fd);
-                        
+
 				Log() << "Start read slave socket" << endl;
 				return Events[i].data.fd;
 			}

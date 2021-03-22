@@ -30,10 +30,10 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
             ClientSocket cs(socket);
 
-            Buffer buffer = cs.ReadPacket();
-
             WriteLog ("Get command from client");
 
+            Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
+            Buffer buffer = cs.ReadPacket();
             Packet packet = HTTPPacket::Parse (buffer);
             if (packet.IsGETMethod())
             {
@@ -79,9 +79,9 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
         while(keep_thread_running);
 
 	}
-	catch (const std::exception& exception)
+	catch (const std::exception& e)
 	{
-		WriteLog (exception.what());
+		WriteLog (e.what());
 	}
 	catch (...)
 	{
