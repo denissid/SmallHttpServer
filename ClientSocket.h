@@ -13,7 +13,7 @@ class ClientSocket
 		ClientSocket (int socket);
 
 		Buffer ReadPacket() const;
-		void WritePacket (const Buffer& packet);
+		void WritePacket (const Buffer& packet) const;
 
 		~ClientSocket ();
 

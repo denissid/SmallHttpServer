@@ -20,7 +20,7 @@ typedef std::string Buffer;
 namespace HTTPParams 
 {
     static const std::string commnad = "command";
-    static const std::string connection = "connection";
+    //static const std::string connection = "connection";
     static const std::string path = "path";
 }
 
@@ -43,6 +43,11 @@ struct Packet
 	{
 		return std::string("GET")==params.at("command"); 
 	}
+
+    bool IsKeepAlive() const 
+    {
+        return std::string("keep-alive")==params.at("Connection");
+    }
 };
 
 namespace HTTPPacket

@@ -10,18 +10,51 @@
 #include <sstream>
 #include <atomic>
 
-std::atomic<bool> keep_thread_running;
+namespace Commander
+{
+    bool ProcessGET (const ClientSocket &cs, const Packet &packet, const std::string &directory)
+    { 
+        using namespace std;
+
+        string path = packet.GetPath();
+        string fullPath = directory + path;
+        cout << "try open ' " << fullPath << "' " << endl;
+
+        fstream file (fullPath.c_str(), std::fstream::in);
+        if (file)
+        {
+
+            stringstream body;
+            body << file.rdbuf();
+
+            Buffer message = HTTPResponses::Create200(body.str());
+            cs.WritePacket (message);
+
+            WriteLog("Send message 200");
+            return true;
+        }
+        else
+        {
+            Log() << "file is absened " << path << std::endl;
+        }
+        return false;
+    }
+}
+
+std::atomic<bool> keepThreadRunning;
 
 void Worker (const ThreadSafeStack& stack, const std::string& directory)
 {	
 	try
 	{
-	    keep_thread_running = true;
+	    keepThreadRunning = true;
+
 
         using namespace std;
         do
         {
-	        if (keep_thread_running == false)
+            bool isKeepAlive = false;
+	        if (keepThreadRunning == false)
                 break;
 
             int socket = stack.GetSocket();
@@ -31,52 +64,38 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
             ClientSocket cs(socket);
 
             WriteLog ("Get command from client");
-
             Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
-            Buffer buffer = cs.ReadPacket();
-            Packet packet = HTTPPacket::Parse (buffer);
-            if (packet.IsGETMethod())
+
+            do
             {
-                string path = packet.GetPath();
-                string fullPath = directory + path;
-                cout << "open ' " << fullPath << "' " << endl;
+                Buffer buffer = cs.ReadPacket();
+                if (buffer.empty())
+                    break;
 
-                fstream file (fullPath.c_str(), std::fstream::in);
-                if (file)
+                Packet packet = HTTPPacket::Parse (buffer);
+                isKeepAlive = packet.IsKeepAlive();
+                if (isKeepAlive)
+                    std::cout << " keep alive " << std::endl;
+//need to check
+                if (packet.IsGETMethod())
                 {
+                    bool isOk = Commander::ProcessGET (cs, packet, directory);
+                    if (!isOk)
+                    { 
+                        cout << "Can't process command (only GET supported)" << endl;
+                        Buffer bufferError = HTTPResponses::Create404();
 
-                    stringstream body;
-                    body << file.rdbuf();
+                        cs.WritePacket (bufferError);
 
-                    Buffer message = HTTPResponses::Create200(body.str());
-                    cs.WritePacket (message);
-
-                    WriteLog("Send message 200");
-                }
-                else
-                {
-                    cout << "File wasn't founded "<< fullPath << endl;
-                    Buffer bufferError = HTTPResponses::Create404();
-
-                    cs.WritePacket (bufferError);
-                    
-                    WriteLog("Send message 404");
-                    WriteLog(HTTPPacket::Split(bufferError));
+                        WriteLog("Send message 404");
+                        WriteLog (HTTPPacket::Split(bufferError));
+                    }
                 }
             }
-            else
-            {
-                cout << "Can't process command " << endl;
-                Buffer bufferError = HTTPResponses::Create404();
-
-                cs.WritePacket (bufferError);
-
-                WriteLog("Send message 404");
-                WriteLog (HTTPPacket::Split(bufferError));
-            }
+            while (isKeepAlive && keepThreadRunning);
         
         }
-        while(keep_thread_running);
+        while(keepThreadRunning);
 
 	}
 	catch (const std::exception& e)

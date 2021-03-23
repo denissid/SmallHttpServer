@@ -16,11 +16,11 @@
 #include "ThreadSafeStack.h"
 #include "Logger.h"
 
-extern std::atomic<bool> keep_thread_running;
+extern std::atomic<bool> keepThreadRunning;
 
 static void sig_handler(int )
 {
-    keep_thread_running = false;
+    keepThreadRunning = false;
 }
 
 void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
@@ -62,7 +62,7 @@ int main (int argc, char** argv)
 			int s = server.WaitClients();
 			stack.AddSocket(s);
 		}
-		while(keep_thread_running);
+		while(keepThreadRunning);
 	}
 	catch(std::exception& e)
 	{

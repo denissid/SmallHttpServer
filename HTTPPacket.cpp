@@ -71,7 +71,7 @@ Packet Parse (const Buffer& buffer)
 	string path = header.substr(k, z-k);
 	packet.AddParam("path", path);
 
-    const std::string nameField = "connection";
+    const std::string nameField = "Connection";
     string valueConnection = extractField(buffer, nameField);
     packet.AddParam(nameField, valueConnection);
 

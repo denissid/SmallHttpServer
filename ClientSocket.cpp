@@ -32,6 +32,10 @@ namespace
 
 ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
+    timeval timeout = {0};
+    timeout.tv_sec  = 5; 
+    timeout.tv_usec = 0;
+    setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
 }
 
 Buffer ClientSocket::ReadPacket() const
@@ -46,10 +50,9 @@ Buffer ClientSocket::ReadPacket() const
 
         if (IsEndPacket(offset, buffer))
         {
-            Log() << "stop read from socket" << std::endl;
+            Log() << "stop reading from socket" << std::endl;
             break;
         }
-
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
 
     }
@@ -58,8 +61,11 @@ Buffer ClientSocket::ReadPacket() const
     //TODO EAGAIN is not processed
 	if (size==-1 && errno==EAGAIN)
 	{
-		Log() << "Error socket --> " << (int)errno << endl;
+		Log() << "Error socket TIMEOUT--> " << (int)errno << endl;
 		perror("Error socket");
+
+        buffer.clear();
+        return buffer;
 	}
 
 	Log() << "Received offset = " <<offset <<  endl;
@@ -67,7 +73,7 @@ Buffer ClientSocket::ReadPacket() const
     return buffer;
 }
 
-void ClientSocket::WritePacket (const Buffer& buffer)
+void ClientSocket::WritePacket (const Buffer& buffer) const 
 {
 	int size = 0, offset = 0;
 	do
