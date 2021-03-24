@@ -6,12 +6,12 @@
 #include <iostream>
 #include <sstream>
 
+using namespace std;
 
 namespace HTTPPacket
 {
-using namespace std;
 
-std::string extractField(const Buffer& buffer, const std::string &field)
+string extractField(const Buffer& buffer, const string &field)
 {
     auto bCommand = buffer.find (field);
     if (bCommand==string::npos)
@@ -33,9 +33,9 @@ Packet Parse (const Buffer& buffer)
 {
 	Packet packet;
 
-    std::cout << buffer; 
-	WriteLog("Parse ");
-	WriteLog(HTTPPacket::Split(buffer));
+ //   std::cout << buffer; 
+//	WriteLog("Parse ");
+//	WriteLog(HTTPPacket::Split(buffer));
 
     //parse header example: GET /index.html HTTP/1.1
 	size_t i = buffer.find("\r\n");
@@ -78,7 +78,7 @@ Packet Parse (const Buffer& buffer)
 	return packet;
 }
 
-std::vector<std::string> Split (const Buffer& buffer)
+vector<string> Split (const Buffer& buffer)
 {
 	using namespace std;
 
@@ -118,12 +118,28 @@ std::vector<std::string> Split (const Buffer& buffer)
 
 }
 
+namespace HTTPRequest 
+{
+        Buffer CreateGET (const string& host, const string& port)
+        {
+            Buffer b = "GET /index.html HTTP/1.1\r\n"
+            "Host: "+host+":"+port+"\r\n"
+            "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:35.0) Gecko/20100101 Firefox/35.0\r\n"
+            "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*//*;q=0.8\r\n"
+            "Accept-Language: en-US,en;q=0.5\r\n"
+            "Accept-Encoding: gzip, deflate\r\n"
+            "Connection: keep-alive\r\n"
+            "\r\n";
+            return b;
+        }
+}
+
+
 namespace HTTPResponses
 {
 
-using namespace std;
 
-Buffer Create200(const std::string& dataFile)
+Buffer Create200(const string& dataFile)
 {
 	Buffer buffer ("HTTP/1.0 200 OK\r\n");
 
@@ -131,7 +147,8 @@ Buffer Create200(const std::string& dataFile)
 	+ "Connection: keep-alive\r\n"
 	+ "Content-Type: text/html\r\n"
 	+ "\r\n"
-	+ dataFile;
+	+ dataFile
+    + "\r\n\r\n";
  
 
 	return buffer;
@@ -140,11 +157,11 @@ Buffer Create200(const std::string& dataFile)
 Buffer Create404 ()
 {
 	
-	string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
-	string buffer ("HTTP/1.0 404 Not Found\r\n");
+    string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
+    string buffer ("HTTP/1.0 404 Not Found\r\n");
 		buffer += "Content-Type: text/html\r\n";
 	   	buffer += "Content-length: " + to_string(body.size()) + "\r\n";
-		buffer += "Connection: keep-alive\r\n" + body;
+		buffer += "Connection: keep-alive\r\n\r\n" + body;
 
 	return buffer;
 }

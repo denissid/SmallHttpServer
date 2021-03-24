@@ -64,13 +64,16 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
             ClientSocket cs(socket);
 
             WriteLog ("Get command from client");
-            Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
 
             do
             {
+                Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
+                std::cout << "Thread id = " << std::this_thread::get_id() << std::endl;
                 Buffer buffer = cs.ReadPacket();
                 if (buffer.empty())
+                {
                     break;
+                }
 
                 Packet packet = HTTPPacket::Parse (buffer);
                 isKeepAlive = packet.IsKeepAlive();
@@ -82,13 +85,13 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
                     bool isOk = Commander::ProcessGET (cs, packet, directory);
                     if (!isOk)
                     { 
-                        cout << "Can't process command (only GET supported)" << endl;
+                       // cout << "Can't process command (only GET supported)" << endl;
                         Buffer bufferError = HTTPResponses::Create404();
 
                         cs.WritePacket (bufferError);
 
-                        WriteLog("Send message 404");
-                        WriteLog (HTTPPacket::Split(bufferError));
+                      //  WriteLog("Send message 404");
+                      //  WriteLog (HTTPPacket::Split(bufferError));
                     }
                 }
             }

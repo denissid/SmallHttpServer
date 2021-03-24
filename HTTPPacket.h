@@ -52,9 +52,14 @@ struct Packet
 
 namespace HTTPPacket
 {
-        std::string extractField(const Buffer& buffer, const std::string &field);
+        std::string extractField(const Buffer& buffer, const std::string& field);
 		Packet Parse (const Buffer& buffer);
 		std::vector<std::string> Split (const Buffer& buffer);
+}
+
+namespace HTTPRequest 
+{
+        Buffer CreateGET (const std::string& host, const std::string& port);
 }
 
 namespace HTTPResponses
