@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ThreadSafeStack.h"
 #include <string>
+#include <atomic>
+
+class ThreadSafeStack;
 
 extern std::atomic<bool> keep_thread_runnig;
 

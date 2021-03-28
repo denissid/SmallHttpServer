@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/times.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -34,6 +35,16 @@ namespace
 
 ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
+		Log() << "SOCKET " << m_socket << endl;
+}
+
+void ClientSocket::SetTimeout ()
+{ 
+    timeval timeout = {0};
+    timeout.tv_sec  = 5; 
+    timeout.tv_usec = 0;
+    setsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    setsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
 }
 
 bool ClientSocket::Connect(const std::string& ip, int port)
@@ -73,10 +84,13 @@ Buffer ClientSocket::ReadPacket() const
             break;
         }
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-
     }
 	while (size > 0);
 
+    if (size==0)
+    {
+        std::cout << "size=0 client closed" << std::endl;
+    }
 
     //TODO EAGAIN is not processed
 	if (size==-1 && errno==EAGAIN)
@@ -84,8 +98,8 @@ Buffer ClientSocket::ReadPacket() const
 		Log() << "Error socket TIMEOUT--> " << (int)errno << endl;
 		perror("Error read socket");
 
-       // buffer.clear();
-        //return buffer;
+        buffer.clear();
+        return buffer;
 	}
 
 	Log() << "Received offset = " << offset <<  endl;
@@ -115,7 +129,7 @@ void ClientSocket::CloseSocket()
 {
 	if (m_socket!=-1)
 	{
-		Log() << "Client Socket Closed" << std::endl;
+		//Log() << "Client Socket Closed" << std::endl;
 		shutdown(m_socket, SHUT_RDWR);
 		close(m_socket);
 		m_socket = -1;

@@ -15,6 +15,7 @@
 
 #include "Exceptions.h"
 #include "Logger.h"
+#include "ClientSocket.h"
 
 using namespace std;
 

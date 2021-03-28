@@ -1,7 +1,6 @@
 #pragma one
 
 #include <string>
-#include "ClientSocket.h"
 
 class Server 
 {
@@ -13,11 +12,13 @@ class Server
 		Server (const std::string& address, int port);
 		int WaitClients();
 
-        void AddSocket (int socket);
-        void DeleteSocket (int socket);
-
 		~Server ();
 
 		Server(const Server&) = delete;
 		Server& operator= (const Server&) = delete;
+
+    private:
+        
+        void AddSocket (int socket);
+        void DeleteSocket (int socket);
 };

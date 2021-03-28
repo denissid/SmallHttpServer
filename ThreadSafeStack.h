@@ -1,6 +1,5 @@
 #pragma once 
 
-#include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <stack>
@@ -13,16 +12,15 @@ class ThreadSafeStack
 
 	public:
 	
-		ThreadSafeStack()
-		{
-		}
+		ThreadSafeStack() = default;
 
 		void AddSocket(int i);
-		int GetSocket() const ;
+		int GetSocket() const;
 
 		~ThreadSafeStack();
 
 	private:
+        
 		ThreadSafeStack(const ThreadSafeStack&);
 		ThreadSafeStack& operator= (const ThreadSafeStack&);
 };

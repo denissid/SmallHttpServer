@@ -4,11 +4,12 @@
 #include "HTTPPacket.h"
 #include "Logger.h"
 #include "Exceptions.h"
+#include "ThreadSafeStack.h"
 
+#include <thread>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <atomic>
 
 namespace Commander
 {
@@ -62,24 +63,26 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
                 continue;
 
             ClientSocket cs(socket);
+            cs.SetTimeout();
 
             WriteLog ("Get command from client");
+            int i = 1;
 
             do
             {
                 Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
                 std::cout << "Thread id = " << std::this_thread::get_id() << std::endl;
+
                 Buffer buffer = cs.ReadPacket();
                 if (buffer.empty())
                 {
+                    std::cout << "packet empty " <<std::endl;
                     break;
                 }
 
                 Packet packet = HTTPPacket::Parse (buffer);
                 isKeepAlive = packet.IsKeepAlive();
-                if (isKeepAlive)
-                    std::cout << " keep alive " << std::endl;
-//need to check
+
                 if (packet.IsGETMethod())
                 {
                     bool isOk = Commander::ProcessGET (cs, packet, directory);
@@ -90,10 +93,9 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
                         cs.WritePacket (bufferError);
 
-                      //  WriteLog("Send message 404");
-                      //  WriteLog (HTTPPacket::Split(bufferError));
                     }
                 }
+
             }
             while (isKeepAlive && keepThreadRunning);
         

@@ -10,10 +10,12 @@ set (SOURCES_FILES_MAIN main.cpp)
 
 set (SOURCES_FILES_TEST mainTests.cpp)
 
-set (SOURCES_FILES  Options.h Options.cpp Server.h Server.cpp ClientSocket.h ClientSocket.cpp
-    HTTPPacket.h HTTPPacket.cpp DaemonHelper.h Worker.h Worker.cpp ThreadSafeStack.h ThreadSafeStack.cpp Logger.h Exceptions.h nlohmann/json.hpp )
+#set (SOURCES_FILES  Options.h Options.cpp Server.h Server.cpp ClientSocket.h ClientSocket.cpp
+#    HTTPPacket.h HTTPPacket.cpp DaemonHelper.h Worker.h Worker.cpp ThreadSafeStack.h ThreadSafeStack.cpp Logger.h Exceptions.h nlohmann/json.hpp Logger.cpp)
 
 
+set (SOURCES_FILES  Options.cpp Server.cpp  ClientSocket.cpp
+     HTTPPacket.cpp  Worker.cpp  ThreadSafeStack.cpp nlohmann/json.hpp Logger.cpp)
 
 set (CMAKE_CXX_FLAGS "-std=c++14 -pthread")
 

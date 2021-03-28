@@ -26,7 +26,7 @@ static void sig_handler(int )
 void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
 	using namespace std;
-	int i = thread::hardware_concurrency();
+	int i = 20;//thread::hardware_concurrency();
 	Log() << "Count of threads " << i << endl;
 	while(i--)
 	{
@@ -50,7 +50,6 @@ int main (int argc, char** argv)
 		Log() << options.GetDirectory() << endl;
 		
 	//	MakeDaemon();
-
 		Server server (options.GetIP(), options.GetPort());
 
 		ThreadSafeStack stack;
