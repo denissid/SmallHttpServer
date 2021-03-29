@@ -1,8 +1,8 @@
 #pragma once 
 
+#include <stack>
 #include <mutex>
 #include <condition_variable>
-#include <stack>
 
 class ThreadSafeStack
 {

@@ -14,9 +14,8 @@ class ClientSocket
 
         bool Connect(const std::string& ip, int port);
         void SetTimeout ();
-
-		Buffer ReadPacket() const;
-		void WritePacket (const Buffer& packet) const;
+		int ReadPacket(Buffer& packet) const;
+		int WritePacket (const Buffer& packet) const;
 
 		~ClientSocket ();
 

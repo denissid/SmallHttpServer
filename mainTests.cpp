@@ -26,16 +26,26 @@ void SndRcvClient()
     cSocket.Connect ("192.168.122.1", 49001);
     cSocket.SetTimeout();
 
-    Buffer b = HTTPRequest::CreateGET("127.0.0.1", "49001");
+    Buffer packetGet = HTTPRequest::CreateGET("127.0.0.1", "49001");
     int i=10;
     do
     {
-        cSocket.WritePacket(b);
-        Buffer packet = cSocket.ReadPacket();
-        if (packet.empty())
+        int result1 = cSocket.WritePacket(packetGet);
+        if (result1<=0)
         {
+            perror ("Writepacket ");
             cTimeout++;
-            std::cout << "Packet empty " << std::endl;
+            std::cout << "error packet write " << result1 << std::endl;
+            break;
+        }
+
+        Buffer packet;
+        int result = cSocket.ReadPacket(packet);
+        if (result<=0)
+        {
+            perror ("Readpacket ");
+            cTimeout++;
+            std::cout << "error packet read " << result << std::endl;
             break;
          }
     } while(--i);

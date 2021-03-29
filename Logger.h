@@ -11,7 +11,7 @@ class TimePrefix
 	public:
 
         TimePrefix();
-        std::string GetStringTime() const;        
+        std::string GetString() const;        
         size_t GetSize() const;
 
         TimePrefix(const TimePrefix&) = default;

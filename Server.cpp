@@ -1,6 +1,7 @@
 #include "Server.h"
 
 #include <iostream>
+#include <atomic>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,12 +20,14 @@
 
 using namespace std;
 
+extern std::atomic<bool> keepThreadRunning;
+
 namespace 
 {
 
 	int SetNonblock(int fd)
 	{
-		int flags=0;
+		int flags = 0;
 	#if defined(O_NONBLOCK)
 		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
 			flags = 0;
@@ -37,7 +40,7 @@ namespace
 
 	int SetBlock(int fd)
 	{
-		int flags=0;
+		int flags = 0;
 	#if defined(O_NONBLOCK)
 		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
 			flags = 0;
@@ -100,14 +103,13 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	Log() << "Added master socket in epoll" << endl;
 
     AddSocket(m_masterSocket);
-
 }
 
 int Server::WaitClients()
 {
 	do
 	{
-		epoll_event Events[max_events]={0};
+		epoll_event Events[max_events] = {0};
 		const size_t countEvents = epoll_wait(m_epoll, Events, max_events, -1);
 		if (countEvents==-1)
 		{
@@ -117,7 +119,7 @@ int Server::WaitClients()
 
         std::cout << "Count events" << countEvents << std::endl;
 
-		for ( size_t i = 0; i<countEvents; ++i)
+		for ( size_t i = 0; i < countEvents; ++i)
 		{
 			if (Events[i].data.fd == m_masterSocket)
 			{
@@ -136,7 +138,9 @@ int Server::WaitClients()
 			}
 		}
 	}
-	while(1);
+	while(keepThreadRunning);
+
+    return -1;
 }
 
 void Server::DeleteSocket (int socket)
@@ -155,7 +159,7 @@ void Server::DeleteSocket (int socket)
 
 void Server::AddSocket (int socket)
 {	
-    epoll_event event={0};
+    epoll_event event = {0};
 	event.data.fd = socket;
 	event.events = EPOLLIN;
 	int err = epoll_ctl(m_epoll, EPOLL_CTL_ADD, socket, &event);

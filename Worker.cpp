@@ -29,7 +29,11 @@ namespace Commander
             body << file.rdbuf();
 
             Buffer message = HTTPResponses::Create200(body.str());
-            cs.WritePacket (message);
+            int result = cs.WritePacket (message);
+            if (result<=0)
+            {
+                return false;
+            }
 
             WriteLog("Send message 200");
             return true;
@@ -50,7 +54,6 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 	{
 	    keepThreadRunning = true;
 
-
         using namespace std;
         do
         {
@@ -65,18 +68,16 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
             ClientSocket cs(socket);
             cs.SetTimeout();
 
-            WriteLog ("Get command from client");
-            int i = 1;
-
             do
             {
                 Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
                 std::cout << "Thread id = " << std::this_thread::get_id() << std::endl;
 
-                Buffer buffer = cs.ReadPacket();
-                if (buffer.empty())
+                Buffer buffer;
+                int result = cs.ReadPacket(buffer);
+                if (result<=0)
                 {
-                    std::cout << "packet empty " <<std::endl;
+                    std::cout << "Error result of read packet " << result << std::endl;
                     break;
                 }
 
@@ -91,7 +92,11 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
                        // cout << "Can't process command (only GET supported)" << endl;
                         Buffer bufferError = HTTPResponses::Create404();
 
-                        cs.WritePacket (bufferError);
+                        int result = cs.WritePacket (bufferError);
+                        if (result<=0)
+                        {
+                            break;
+                        }
 
                     }
                 }

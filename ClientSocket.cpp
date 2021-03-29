@@ -49,7 +49,7 @@ void ClientSocket::SetTimeout ()
 
 bool ClientSocket::Connect(const std::string& ip, int port)
 {
-    struct sockaddr_in addr={0};
+    struct sockaddr_in addr = {0};
 
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
@@ -66,9 +66,8 @@ bool ClientSocket::Connect(const std::string& ip, int port)
     return true;
 }
 
-Buffer ClientSocket::ReadPacket() const
+int ClientSocket::ReadPacket(Buffer& buffer) const
 {	
-    Buffer buffer;
 	buffer.resize(65535);
 	
 	int size = 0, offset = 0;
@@ -85,29 +84,19 @@ Buffer ClientSocket::ReadPacket() const
         }
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
     }
-	while (size > 0);
+	while ( size>0 );
 
-    if (size==0)
+    if ( size<=0 )
     {
-        std::cout << "size=0 client closed" << std::endl;
+        return size;
     }
 
-    //TODO EAGAIN is not processed
-	if (size==-1 && errno==EAGAIN)
-	{
-		Log() << "Error socket TIMEOUT--> " << (int)errno << endl;
-		perror("Error read socket");
-
-        buffer.clear();
-        return buffer;
-	}
-
-	Log() << "Received offset = " << offset <<  endl;
+	Log() << "Size packet '" << offset << "' " <<  endl;
 	buffer.resize (offset);
-    return buffer;
+    return offset;
 }
 
-void ClientSocket::WritePacket (const Buffer& buffer) const 
+int ClientSocket::WritePacket (const Buffer& buffer) const 
 {
 	int size = 0, offset = 0;
 	do
@@ -115,14 +104,14 @@ void ClientSocket::WritePacket (const Buffer& buffer) const
 		offset += size;
 		size = send (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
 	}
-	while(offset<buffer.size() && size>0);
+	while ( offset<buffer.size() && size>0);
 
-    //TODO EAGAIN is not processed
-	if (size==-1 || size==0)
+	if ( size<0 )
 	{
-		perror("Error write socket");
-		Log() << "Error socket " << (int)errno << endl;
+        return size;
 	}
+
+    return offset;
 }
 
 void ClientSocket::CloseSocket()
