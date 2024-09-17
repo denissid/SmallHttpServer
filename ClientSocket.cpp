@@ -79,7 +79,7 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
         {
             //if we have Content-length
             //we should read content length and keep recv
-            Log() << "stop reading from socket";
+            Log() << "stop reading from socket" << std::endl;
             break;
         }
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
@@ -91,7 +91,7 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
         return size;
     }
 
-	Log() << "Size packet '" << offset << "' ";
+	Log() << "Size packet '" << offset << "' " << std::endl;
 	buffer.resize (offset);
     return offset;
 }

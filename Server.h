@@ -9,7 +9,7 @@ class Server
 	
 	public:
         
-		Server (const std::string& address, int port);
+		Server (const std::string& address, const std::string &family, int port);
 		int WaitClients();
 
 		~Server ();

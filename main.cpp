@@ -45,12 +45,13 @@ int main (int argc, char** argv)
 	{
 		Options options(argc, argv);
 
+		Log() << options.GetIPFamily() << endl;
 		Log() << options.GetIP() << endl;
 		Log() << options.GetPort() << endl;
 		Log() << options.GetDirectory() << endl;
 		
 	//	MakeDaemon();
-		Server server (options.GetIP(), options.GetPort());
+		Server server (options.GetIP(), options.GetIPFamily(), options.GetPort());
 
 		ThreadSafeStack stack;
 		CreateThreads (stack, options.GetDirectory());

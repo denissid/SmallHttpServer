@@ -70,8 +70,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
             do
             {
-                Log() << "Thread id = " << std::this_thread::get_id() ;
-                std::cout << "Thread id = " << std::this_thread::get_id();
+                Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
 
                 Buffer buffer;
                 int result = cs.ReadPacket(buffer);

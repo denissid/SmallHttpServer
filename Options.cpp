@@ -10,11 +10,14 @@
 
 #include "Logger.h"
 
-Options::Options(int argc, char** argv): m_ipAddress("127.0.0.1"),m_port(2000),m_directory("/home/denis/Stepick/Final")
+Options::Options(int argc, char** argv): 
+    m_familyAddress(ipFamily::ip4), //ip6
+    m_ipAddress("127.0.0.1"),
+    m_port(2000),
+    m_directory("/home/denis/Stepick/Final")
 {
 	using namespace std;
 	
-
 	LoadConfig();
 	
 	Log() << "Options" << endl;
@@ -67,6 +70,11 @@ std::string Options::GetDirectory() const
 	return m_directory;
 }
 
+std::string Options::GetIPFamily() const
+{
+    return m_familyAddress;
+}
+
 void Options::LoadConfig()
 {
 	using namespace std;
@@ -79,6 +87,7 @@ void Options::LoadConfig()
 		json j;
 		file >> j;
 
+        m_familyAddress = j["ipfamily"];
 		m_ipAddress = j["address"];
 		m_port = j["port"];
 		m_directory = j["directory"];
@@ -87,8 +96,8 @@ void Options::LoadConfig()
 	{
 		Log() << "config.json wasn't found";
 	}
-
-    Log() << " " << m_ipAddress << std::endl;
+    Log() << " address family " << m_familyAddress << std::endl;
+    Log() << " address " << m_ipAddress << std::endl;
 	Log() << " port " << m_port << std::endl;
 	Log() << " directory:" << m_directory << std::endl;
 

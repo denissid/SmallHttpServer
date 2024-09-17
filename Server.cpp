@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -17,6 +18,7 @@
 #include "Exceptions.h"
 #include "Logger.h"
 #include "ClientSocket.h"
+#include "Options.h"
 
 using namespace std;
 
@@ -66,15 +68,19 @@ namespace
 	const int max_events = 300;
 }
 
-Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epoll(-1)
+Server::Server (const std::string& address, const std::string &family, int port): m_masterSocket(-1), m_epoll(-1)
 {
+    Log() << "Configure local address " << std::endl;
 	Log() << "Create master socket " << address <<":"<< port << std::endl;
+
 	m_masterSocket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	sockaddr_in sockAddr = {0};
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(port);
-	if (inet_pton(AF_INET, address.c_str(), &(sockAddr.sin_addr)) == 0)
+    int f = family==ipFamily::ip4 ? AF_INET : AF_INET6;
+
+	if (inet_pton(f, address.c_str(), &(sockAddr.sin_addr)) == 0)
 	{
 		throw NetException("Error convert ip address");
 	}
@@ -85,6 +91,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	int errb = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
 	if (errb==-1)
 	{
+	    perror("error ");
 		throw NetException("BIND error");
 	}
 	
