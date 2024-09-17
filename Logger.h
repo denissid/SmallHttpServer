@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <iostream>
 
 class TimePrefix 
 {
@@ -33,7 +34,27 @@ class Logger
 
 };
 
-std::fstream& Log();
+Logger& Log();
+Logger& LogError();
 void WriteLog(const std::string& message, bool isTimePrefix=true);
 void WriteLog(const std::vector<std::string>& messages);
+
+template <class T>
+static Logger& operator<< (Logger &log, const T& message)
+{
+    log() << message;
+    std::cout << message;
+    return log;
+}
+
+
+static Logger& operator<< (Logger &log, std::ostream&(*pManip)(std::ostream&))
+{
+    (*pManip)(log());
+    (*pManip)(std::cout);
+
+    return log;
+}
+
+
 

@@ -45,7 +45,7 @@ namespace
 		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
 			flags = 0;
         flags &= ~O_NONBLOCK;
-        Log() << "flags " << flags << std::endl;
+        Log() << "flags " << flags << endl;
 		return fcntl (fd, F_SETFL, flags);
 	#else
 		return ioctl(fd, FIOBIO, &flags);
@@ -59,7 +59,7 @@ namespace
 		int result = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 		if (reuse<0)
 		{
-			Log() << "set socket option " << errno << endl;
+			LogError() << "set socket option " << errno;
 		}
 	}
 
@@ -68,7 +68,7 @@ namespace
 
 Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epoll(-1)
 {
-	Log() << "Create master socket " << address <<":"<< port << endl;
+	Log() << "Create master socket " << address <<":"<< port << std::endl;
 	m_masterSocket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	sockaddr_in sockAddr = {0};
@@ -81,7 +81,7 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 
 	SetReuseSocket(m_masterSocket);
 
-	Log() << "Bind master socket" << endl;
+	Log() << "Bind master socket" << std::endl;
 	int errb = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
 	if (errb==-1)
 	{
@@ -93,14 +93,14 @@ Server::Server (const std::string& address, int port): m_masterSocket(-1), m_epo
 	Log() << "Make master socket listened" << endl;
 	listen (m_masterSocket, SOMAXCONN);
 	
-	Log() << "Create epoll descriptor" << endl;
+	Log() << "Create epoll descriptor" <<endl;
 	m_epoll = epoll_create1(0);
 	if (m_epoll==-1)
 	{
 		throw NetException("Epoll create");
 	}
 	
-	Log() << "Added master socket in epoll" << endl;
+	Log() << "Added master socket in epoll" <<endl;
 
     AddSocket(m_masterSocket);
 }
@@ -123,7 +123,7 @@ int Server::WaitClients()
 		{
 			if (Events[i].data.fd == m_masterSocket)
 			{
-				Log() << "Accept socket" << endl;
+				Log() << "Accept socket";
 				int clientSocket = accept (m_masterSocket, 0, 0);
 				//SetNonblock(clientSocket);
 
@@ -152,7 +152,7 @@ void Server::DeleteSocket (int socket)
 
 	if (err==-1)
 	{
-		Log() << "epoll_ctl del" << errno << endl;
+		LogError() << "epoll_ctl del" << errno ;
 	}
 
 }
@@ -166,7 +166,7 @@ void Server::AddSocket (int socket)
 
     if (err==-1)
 	{
-		Log() << "epoll_ctl add socket" << errno << endl;
+		LogError() << "epoll_ctl add socket" << errno << std::endl;
 		throw NetException("Epoll_ctl create");
 	}
 }
@@ -175,7 +175,7 @@ Server::~Server ()
 {	
     DeleteSocket(m_masterSocket);
 
-	Log() << "Master socket closed" << endl;
+	Log() << "Master socket closed" << std::endl;
 	close (m_masterSocket);
 }
 

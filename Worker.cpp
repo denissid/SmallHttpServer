@@ -40,7 +40,7 @@ namespace Commander
         }
         else
         {
-            Log() << "file is absened " << path << std::endl;
+            LogError() << "file is absened " << path ;
         }
         return false;
     }
@@ -70,14 +70,14 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
             do
             {
-                Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
-                std::cout << "Thread id = " << std::this_thread::get_id() << std::endl;
+                Log() << "Thread id = " << std::this_thread::get_id() ;
+                std::cout << "Thread id = " << std::this_thread::get_id();
 
                 Buffer buffer;
                 int result = cs.ReadPacket(buffer);
                 if (result<=0)
                 {
-                    std::cout << "Error result of read packet " << result << std::endl;
+                    LogError() << "Error result of read packet " << result << std::endl;
                     break;
                 }
 

@@ -23,7 +23,7 @@ void SndRcvClient()
 
     ClientSocket cSocket(s);
 
-    cSocket.Connect ("192.168.122.1", 49001);
+    cSocket.Connect ("127.0.0.1", 2000);
     cSocket.SetTimeout();
 
     Buffer packetGet = HTTPRequest::CreateGET("127.0.0.1", "49001");
@@ -48,6 +48,7 @@ void SndRcvClient()
             std::cout << "error packet read " << result << std::endl;
             break;
          }
+        //std::cout << packet;
     } while(--i);
 
     cThreads++;
@@ -61,7 +62,7 @@ int main (int argc, char** argv)
 	TestSplit();
 
     const int max=800;
-    int i=2000, z=max;
+    int i=5, z=max;
     do 
     {
         std::thread thr (SndRcvClient);

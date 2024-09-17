@@ -35,7 +35,7 @@ namespace
 
 ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
-		Log() << "SOCKET " << m_socket << endl;
+		Log() << "SOCKET " << m_socket;
 }
 
 void ClientSocket::SetTimeout ()
@@ -79,7 +79,7 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
         {
             //if we have Content-length
             //we should read content length and keep recv
-            Log() << "stop reading from socket" << std::endl;
+            Log() << "stop reading from socket";
             break;
         }
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
@@ -91,7 +91,7 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
         return size;
     }
 
-	Log() << "Size packet '" << offset << "' " <<  endl;
+	Log() << "Size packet '" << offset << "' ";
 	buffer.resize (offset);
     return offset;
 }

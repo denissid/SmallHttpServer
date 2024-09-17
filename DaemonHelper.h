@@ -12,11 +12,11 @@ void MakeDaemon()
 	int r = daemon(1,1);
 	if (r==1)
 	{
-		Log() << "Error daemonise" << endl;
+		Log() << "Error daemonise" ;
 		return;
 	}
 
-	Log() << "Launch daemon" << endl;
+	Log() << "Launch daemon" ;
 }
 
 

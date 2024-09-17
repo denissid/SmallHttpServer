@@ -43,7 +43,7 @@ Options::Options(int argc, char** argv): m_ipAddress("127.0.0.1"),m_port(2000),m
 			}
 			case '?':
 			{
-				Log() << "Error" << endl;
+				Log() << "Error";
 				break;
 			}
 		}
@@ -80,16 +80,18 @@ void Options::LoadConfig()
 		file >> j;
 
 		m_ipAddress = j["address"];
-		Log() << m_ipAddress << endl;
 		m_port = j["port"];
-		Log() << "port " << m_port << endl;
 		m_directory = j["directory"];
-		Log() << "directory:" << m_directory << endl;
 	}
 	else
 	{
-		Log() << "config.json wasn't found" << endl;
+		Log() << "config.json wasn't found";
 	}
+
+    Log() << " " << m_ipAddress << std::endl;
+	Log() << " port " << m_port << std::endl;
+	Log() << " directory:" << m_directory << std::endl;
+
 }
 
 Options::~Options()

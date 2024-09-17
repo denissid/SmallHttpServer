@@ -27,7 +27,7 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
 	using namespace std;
 	int i = 20;//thread::hardware_concurrency();
-	Log() << "Count of threads " << i << endl;
+	Log() << "Count of threads " << i <<endl;
 	while(i--)
 	{
 		thread thr(std::bind(Worker, std::ref(stack), folder));
@@ -65,11 +65,11 @@ int main (int argc, char** argv)
 	}
 	catch(std::exception& e)
 	{
-		Log() << e.what() << endl;
+		LogError() << "Exception "<< e.what() << endl;
 	}
 	catch (...)
 	{
-		Log() << "Unknown exception" << endl;
+		LogError() << "Unknown exception" << endl;
 	}
 
 	return 0;

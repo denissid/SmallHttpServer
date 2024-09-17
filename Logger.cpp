@@ -43,11 +43,17 @@ Logger::Logger(): m_file("log.txt", fstream::in | fstream::out | fstream::app)
     }
 }
 
-fstream& Log()
+Logger& Log()
 {
 	TimePrefix timePrefix;
 	logger() << timePrefix.GetString() << " ";
-	return logger();
+	return logger;
+}
+
+Logger &LogError()
+{
+    logger() << "Error ";
+    return logger;
 }
 
 #define OUTPUT_TO_SCREEN 1
