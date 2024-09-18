@@ -71,7 +71,7 @@ namespace
 Server::Server (const std::string& address, const std::string &family, int port): m_masterSocket(-1), m_epoll(-1)
 {
     Log() << "Configure local address " << std::endl;
-	Log() << "Create master socket " << address <<":"<< port << std::endl;
+	Log() << "Create master socket " + address +  ":" + to_string(port) << std::endl;
 
 	m_masterSocket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -124,16 +124,24 @@ int Server::WaitClients()
 			throw NetException("Epoll_wait create");
 		}
 
-        std::cout << "Count events" << countEvents << std::endl;
+        Log() << "Count events " + to_string(countEvents) << std::endl;
 
 		for ( size_t i = 0; i < countEvents; ++i)
 		{
 			if (Events[i].data.fd == m_masterSocket)
 			{
-				Log() << "Accept socket";
-				int clientSocket = accept (m_masterSocket, 0, 0);
-				//SetNonblock(clientSocket);
+				Log() << "Accept socket " << endl;
 
+                sockaddr_storage client_address = {0};
+                socklen_t client_len = sizeof(client_address);
+				int clientSocket = accept (m_masterSocket, (sockaddr*)&client_address, &client_len);
+                char address_buffer[100]={0};
+                getnameinfo((sockaddr*) &client_address, client_len, address_buffer, sizeof(address_buffer), 0, 0, NI_NUMERICHOST);
+
+                string s(address_buffer);
+                Log() << s << std::endl;
+
+				//SetNonblock(clientSocket);
                 AddSocket(clientSocket);
 			}
 			else
@@ -159,7 +167,7 @@ void Server::DeleteSocket (int socket)
 
 	if (err==-1)
 	{
-		LogError() << "epoll_ctl del" << errno ;
+		LogError() << "epoll_ctl del " + to_string(errno) ;
 	}
 
 }
@@ -173,7 +181,7 @@ void Server::AddSocket (int socket)
 
     if (err==-1)
 	{
-		LogError() << "epoll_ctl add socket" << errno << std::endl;
+		LogError() << "epoll_ctl add socket" + to_string(errno) << std::endl;
 		throw NetException("Epoll_ctl create");
 	}
 }

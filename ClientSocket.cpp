@@ -35,7 +35,7 @@ namespace
 
 ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
-		Log() << "SOCKET " << m_socket;
+		Log() << "SOCKET " + to_string(m_socket) << std::endl;
 }
 
 void ClientSocket::SetTimeout ()
@@ -60,7 +60,7 @@ bool ClientSocket::Connect(const std::string& ip, int port)
     int r = connect (m_socket, (sockaddr*)&addr, addrlen);
     if (r<0)
     {
-        std::cout << "error connection " << r;
+        LogError() << " error connection " + to_string(r) << std::endl;
         return false;
     }
     return true;
@@ -91,7 +91,7 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
         return size;
     }
 
-	Log() << "Size packet '" << offset << "' " << std::endl;
+	Log() << "Size packet '" + to_string(offset) + "' " << std::endl;
 	buffer.resize (offset);
     return offset;
 }

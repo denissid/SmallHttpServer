@@ -19,7 +19,7 @@ namespace Commander
 
         string path = packet.GetPath();
         string fullPath = directory + path;
-        cout << "try open ' " << fullPath << "' " << endl;
+        cout << "try open ' "+ fullPath + "' " << endl;
 
         fstream file (fullPath.c_str(), std::fstream::in);
         if (file)
@@ -40,7 +40,7 @@ namespace Commander
         }
         else
         {
-            LogError() << "file is absened " << path ;
+            LogError() << "file is absened " + path ;
         }
         return false;
     }
@@ -70,13 +70,14 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
             do
             {
-                Log() << "Thread id = " << std::this_thread::get_id() << std::endl;
+                Log() << "Thread id " << std::endl;
+                Log() << std::this_thread::get_id() << std::endl;
 
                 Buffer buffer;
                 int result = cs.ReadPacket(buffer);
                 if (result<=0)
                 {
-                    LogError() << "Error result of read packet " << result << std::endl;
+                    LogError() << "Error result of read packet "+ to_string(result) << std::endl;
                     break;
                 }
 

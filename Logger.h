@@ -43,7 +43,8 @@ template <class T>
 static Logger& operator<< (Logger &log, const T& message)
 {
     log() << message;
-    std::cout << message;
+    TimePrefix tm;
+    std::cout << tm.GetString() <<"'"<< message<<"'";
     return log;
 }
 

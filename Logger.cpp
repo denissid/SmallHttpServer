@@ -52,7 +52,8 @@ Logger& Log()
 
 Logger &LogError()
 {
-    logger() << "Error ";
+	TimePrefix timePrefix;
+    logger() << timePrefix.GetString() << " Error ";
     return logger;
 }
 

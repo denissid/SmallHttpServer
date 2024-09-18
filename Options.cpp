@@ -96,10 +96,10 @@ void Options::LoadConfig()
 	{
 		Log() << "config.json wasn't found";
 	}
-    Log() << " address family " << m_familyAddress << std::endl;
-    Log() << " address " << m_ipAddress << std::endl;
-	Log() << " port " << m_port << std::endl;
-	Log() << " directory:" << m_directory << std::endl;
+    Log() << " address family " + m_familyAddress << std::endl;
+    Log() << " address " + m_ipAddress << std::endl;
+	Log() << " port " + std::to_string(m_port) << std::endl;
+	Log() << " directory: " + m_directory << std::endl;
 
 }
 

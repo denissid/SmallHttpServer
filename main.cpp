@@ -27,7 +27,7 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
 	using namespace std;
 	int i = 20;//thread::hardware_concurrency();
-	Log() << "Count of threads " << i <<endl;
+	Log() << "Count of threads "+ to_string(i) <<endl;
 	while(i--)
 	{
 		thread thr(std::bind(Worker, std::ref(stack), folder));
