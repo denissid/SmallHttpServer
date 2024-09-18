@@ -4,6 +4,7 @@
 #include <cassert>
 #include <vector>
 #include <string>
+#include <map>
 
 Buffer buffer = "GET /index.html?a=5 HTTP/1.1\r\n"
 		"Host: 127.0.0.1:2000\r\n"
@@ -26,7 +27,7 @@ void TestGETParse()
 
 void TestExtract()
 {
-    auto field = HTTPPacket::extractField(buffer, "Connection");
+    auto field = HTTPPacket::ExtractField(buffer, "Connection");
     std::cout << "'" << field << "'";
     assert (field=="keep-alive");
 }
@@ -53,3 +54,26 @@ void TestSplit()
 
 }
 
+void TestGetContentType()
+{
+    std::map<std::string,std::string> files = {{"file.css", "text/css"},
+                                               {"file.csv","text/csv"},
+                                               {"file.gif","image/gif"},
+                                               {"file.htm","text/html"},
+                                               {"file.html","text/html"},
+                                               {"file.ico","image/x-icon"},
+                                               {"file.jpeg","image/jpeg"},
+                                               {"file.jpg","image/jpeg"},
+                                               {"file.js","application/javascript"},
+                                               {"file.json", "application/json"},
+                                               {"file.png","image/png"},
+                                               {"file.pdf","application/pdf"},
+                                               {"file.svg","application/svg+xml"},
+                                               {"file.txt", "text/plain"} };
+
+    for (auto &t: files)
+    {
+        auto res = FileHelper::GetContentType(t.first);
+        assert(res==t.second);
+    }
+}

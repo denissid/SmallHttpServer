@@ -21,6 +21,8 @@ namespace Commander
         string fullPath = directory + path;
         cout << "try open ' "+ fullPath + "' " << endl;
 
+        auto contentType = FileHelper::GetContentType(fullPath);
+
         fstream file (fullPath.c_str(), std::fstream::in);
         if (file)
         {
@@ -28,7 +30,7 @@ namespace Commander
             stringstream body;
             body << file.rdbuf();
 
-            Buffer message = HTTPResponses::Create200(body.str());
+            Buffer message = HTTPResponses::Create200(body.str(), contentType);
             int result = cs.WritePacket (message);
             if (result<=0)
             {

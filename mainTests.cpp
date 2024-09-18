@@ -60,7 +60,9 @@ int main (int argc, char** argv)
     TestExtract();
 	TestGETParse();
 	TestSplit();
+    TestGetContentType();
 
+    return 0;
     const int max=800;
     int i=5, z=max;
     do 

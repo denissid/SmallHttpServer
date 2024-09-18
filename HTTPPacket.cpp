@@ -11,7 +11,7 @@ using namespace std;
 namespace HTTPPacket
 {
 
-string extractField(const Buffer& buffer, const string &field)
+string ExtractField(const Buffer& buffer, const string &field)
 {
     auto bCommand = buffer.find (field);
     if (bCommand==string::npos)
@@ -72,7 +72,7 @@ Packet Parse (const Buffer& buffer)
 	packet.AddParam("path", path);
 
     const std::string nameField = "Connection";
-    string valueConnection = extractField(buffer, nameField);
+    string valueConnection = ExtractField(buffer, nameField);
     packet.AddParam(nameField, valueConnection);
 
 	return packet;
@@ -139,13 +139,13 @@ namespace HTTPResponses
 {
 
 
-Buffer Create200(const string& dataFile)
+Buffer Create200(const string& dataFile, const string &contentType)
 {
 	Buffer buffer ("HTTP/1.0 200 OK\r\n");
 
 	buffer += "Content-length: " + to_string(dataFile.size()) + "\r\n"
 	+ "Connection: keep-alive\r\n"
-	+ "Content-Type: text/html\r\n"
+	+ "Content-Type: "+contentType +"\r\n"
 	+ "\r\n"
 	+ dataFile
     + "\r\n\r\n";

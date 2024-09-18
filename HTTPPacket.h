@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <iostream>
 
 typedef std::string Buffer;
 
@@ -52,7 +53,7 @@ struct Packet
 
 namespace HTTPPacket
 {
-        std::string extractField(const Buffer& buffer, const std::string& field);
+        std::string ExtractField(const Buffer& buffer, const std::string& field);
 		Packet Parse (const Buffer& buffer);
 		std::vector<std::string> Split (const Buffer& buffer);
 }
@@ -64,6 +65,34 @@ namespace HTTPRequest
 
 namespace HTTPResponses
 {
-		Buffer Create200 (const std::string& dataFile);
+		Buffer Create200 (const std::string& dataFile, const std::string &contentType);
 		Buffer Create404 ();
 }
+
+
+namespace FileHelper 
+{
+    static const  std::string GetContentType(const std::string &fileName)
+    { 
+        static std::map<std::string,std::string> files = {{".css", "text/css"},
+                                               {".csv","text/csv"},
+                                               {".gif","image/gif"},
+                                               {".htm","text/html"},
+                                               {".html","text/html"},
+                                               {".ico","image/x-icon"},
+                                               {".jpeg","image/jpeg"},
+                                               {".jpg","image/jpeg"},
+                                               {".js","application/javascript"},
+                                               {".json", "application/json"},
+                                               {".png","image/png"},
+                                               {".pdf","application/pdf"},
+                                               {".svg","application/svg+xml"},
+                                               {".txt", "text/plain"} };
+
+
+        auto pos = fileName.rfind('.');
+        auto ext = fileName.substr(pos, std::string::npos);
+        return files.at(ext);
+    }
+}
+
