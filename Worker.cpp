@@ -18,33 +18,49 @@ namespace Commander
         using namespace std;
 
         string path = packet.GetPath();
+        //check path 
+        if (path.size()>100)
+        {
+            Buffer message = HTTPResponses::Create400();
+            cs.WritePacket (message);
+            return false;
+        }
+        if (path=="..")
+        {
+            Buffer message = HTTPResponses::Create404();
+            cs.WritePacket (message);
+
+            return false;
+        }
+
         string fullPath = directory + path;
-        cout << "try open ' "+ fullPath + "' " << endl;
 
         auto contentType = FileHelper::GetContentType(fullPath);
 
         fstream file (fullPath.c_str(), std::fstream::in);
-        if (file)
+        if (!file)
         {
-
-            stringstream body;
-            body << file.rdbuf();
-
-            Buffer message = HTTPResponses::Create200(body.str(), contentType);
-            int result = cs.WritePacket (message);
-            if (result<=0)
-            {
-                return false;
-            }
-
-            WriteLog("Send message 200");
-            return true;
+            Buffer message = HTTPResponses::Create404();
+            cs.WritePacket (message);
+            return false;
         }
-        else
-        {
-            LogError() << "file is absened " + path ;
+
+        cout << "Open ' "+ fullPath + "' " << endl;
+        stringstream body;
+        body << file.rdbuf();
+
+        Buffer message = HTTPResponses::Create200(body.str(), contentType);
+        int result = cs.WritePacket (message);
+        if (result<=0)
+        { 
+            Buffer bufferError = HTTPResponses::Create404();
+            cs.WritePacket (bufferError);
+
+            LogError() << "Error of send response" << endl;
+            return false;
         }
-        return false;
+
+        return true;
     }
 }
 
@@ -72,8 +88,9 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
             do
             {
-                Log() << "Thread id " << std::endl;
-                Log() << std::this_thread::get_id() << std::endl;
+                stringstream ss;
+                ss << std::this_thread::get_id();
+                Log() << "Thread id " + ss.str() << std::endl;
 
                 Buffer buffer;
                 int result = cs.ReadPacket(buffer);
@@ -88,18 +105,10 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
                 if (packet.IsGETMethod())
                 {
-                    bool isOk = Commander::ProcessGET (cs, packet, directory);
-                    if (!isOk)
-                    { 
-                       // cout << "Can't process command (only GET supported)" << endl;
-                        Buffer bufferError = HTTPResponses::Create404();
-
-                        int result = cs.WritePacket (bufferError);
-                        if (result<=0)
-                        {
-                            break;
-                        }
-
+                    bool isProcessed= Commander::ProcessGET (cs, packet, directory);
+                    if (!isProcessed)
+                    {
+                       break; 
                     }
                 }
 

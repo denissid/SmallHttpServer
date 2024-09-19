@@ -154,6 +154,15 @@ Buffer Create200(const string& dataFile, const string &contentType)
 	return buffer;
 }
 
+Buffer Create400()
+{
+    string buffer = "HTTP/1.1 400 Bad Request\r\n";
+    buffer += "Connection: close\r\n";
+    buffer += "Content-Length: 11\r\n\r\nBad Request\r\n";
+
+    return buffer;
+}
+
 Buffer Create404 ()
 {
 	
@@ -164,6 +173,39 @@ Buffer Create404 ()
 		buffer += "Connection: keep-alive\r\n\r\n" + body;
 
 	return buffer;
+}
+
+}
+
+namespace FileHelper 
+{
+
+const  std::string GetContentType(const std::string &fileName)
+{ 
+    static std::map<std::string,std::string> files = {{".css", "text/css"},
+                                           {".csv","text/csv"},
+                                           {".gif","image/gif"},
+                                           {".htm","text/html"},
+                                           {".html","text/html"},
+                                           {".ico","image/x-icon"},
+                                           {".jpeg","image/jpeg"},
+                                           {".jpg","image/jpeg"},
+                                           {".js","application/javascript"},
+                                           {".json", "application/json"},
+                                           {".png","image/png"},
+                                           {".pdf","application/pdf"},
+                                           {".svg","application/svg+xml"},
+                                           {".txt", "text/plain"} };
+
+
+    auto pos = fileName.rfind('.');
+    if (pos==std::string::npos)
+    {
+        LogError() << "Error file name" + fileName << std::endl;
+        return "";
+    }
+    auto ext = fileName.substr(pos, std::string::npos);
+    return files.at(ext);
 }
 
 }

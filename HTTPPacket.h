@@ -66,33 +66,13 @@ namespace HTTPRequest
 namespace HTTPResponses
 {
 		Buffer Create200 (const std::string& dataFile, const std::string &contentType);
+
+        Buffer Create400();
 		Buffer Create404 ();
 }
 
-
 namespace FileHelper 
 {
-    static const  std::string GetContentType(const std::string &fileName)
-    { 
-        static std::map<std::string,std::string> files = {{".css", "text/css"},
-                                               {".csv","text/csv"},
-                                               {".gif","image/gif"},
-                                               {".htm","text/html"},
-                                               {".html","text/html"},
-                                               {".ico","image/x-icon"},
-                                               {".jpeg","image/jpeg"},
-                                               {".jpg","image/jpeg"},
-                                               {".js","application/javascript"},
-                                               {".json", "application/json"},
-                                               {".png","image/png"},
-                                               {".pdf","application/pdf"},
-                                               {".svg","application/svg+xml"},
-                                               {".txt", "text/plain"} };
-
-
-        auto pos = fileName.rfind('.');
-        auto ext = fileName.substr(pos, std::string::npos);
-        return files.at(ext);
-    }
+    const  std::string GetContentType(const std::string &fileName);
 }
 

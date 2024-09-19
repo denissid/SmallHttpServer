@@ -88,6 +88,8 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
 
     if ( size<=0 )
     {
+        if (size<0)
+            LogError() << " errno recv '" + to_string(errno) <<"' "<< std::endl;
         return size;
     }
 
@@ -108,6 +110,7 @@ int ClientSocket::WritePacket (const Buffer& buffer) const
 
 	if ( size<0 )
 	{
+        LogError() << " error send " + to_string(errno) << std::endl;
         return size;
 	}
 

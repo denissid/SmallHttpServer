@@ -12,7 +12,6 @@ using namespace std::chrono;
 
 TimePrefix::TimePrefix()
 {
-
     auto now = system_clock::now();
     auto microsec = duration_cast<microseconds> (now.time_since_epoch()%seconds(1));
 
