@@ -29,6 +29,19 @@ string ExtractField(const Buffer& buffer, const string &field)
     return buffer.substr(bValue, eValue-bValue);
 }
 
+bool IsBlankLine(const int offset, const Buffer &buffer)
+{ 
+    static const string endPacket = "\r\n\r\n";
+    auto eSize = endPacket.size();
+    if (offset>=eSize)
+    {
+        auto l = buffer.substr(offset-eSize, eSize);
+        return l==endPacket;
+    }
+    return false;
+}
+
+
 Packet Parse (const Buffer& buffer)
 {
 	Packet packet;
@@ -118,6 +131,12 @@ vector<string> Split (const Buffer& buffer)
 
 }
 
+inline std::string getKeepAliveString(bool isKeepAlive)
+{
+    return isKeepAlive ? "keep-alive" : "close";
+}
+
+
 namespace HTTPRequest 
 {
         Buffer CreateGET (const string& host, const string& port)
@@ -138,13 +157,12 @@ namespace HTTPRequest
 namespace HTTPResponses
 {
 
-
-Buffer Create200(const string& dataFile, const string &contentType)
+Buffer Create200(const string& dataFile, const string &contentType, bool isKeepAlive)
 {
 	Buffer buffer ("HTTP/1.0 200 OK\r\n");
 
 	buffer += "Content-length: " + to_string(dataFile.size()) + "\r\n"
-	+ "Connection: keep-alive\r\n"
+	+ "Connection: "+getKeepAliveString(isKeepAlive)+"\r\n"
 	+ "Content-Type: "+contentType +"\r\n"
 	+ "\r\n"
 	+ dataFile
@@ -154,23 +172,23 @@ Buffer Create200(const string& dataFile, const string &contentType)
 	return buffer;
 }
 
-Buffer Create400()
+Buffer Create400(bool isKeepAlive)
 {
-    string buffer = "HTTP/1.1 400 Bad Request\r\n";
-    buffer += "Connection: close\r\n";
-    buffer += "Content-Length: 11\r\n\r\nBad Request\r\n";
+    string buffer = "HTTP/1.0 400 Bad Request\r\n";
+    buffer += "Connection: "+getKeepAliveString(isKeepAlive)+"\r\n";
+    buffer += "Content-Length: 11\r\n\r\nBad Request\r\n\r\n";
 
     return buffer;
 }
 
-Buffer Create404 ()
+Buffer Create404 (bool isKeepAlive)
 {
 	
     string body = "<html> <head> <title>Not Found</title> </head> <body> <p>404 Request file not found.</p></body></html>";
     string buffer ("HTTP/1.0 404 Not Found\r\n");
 		buffer += "Content-Type: text/html\r\n";
 	   	buffer += "Content-length: " + to_string(body.size()) + "\r\n";
-		buffer += "Connection: keep-alive\r\n\r\n" + body;
+		buffer += "Connection: "+getKeepAliveString(isKeepAlive)+"\r\n\r\n" + body+"\r\n\r\n";
 
 	return buffer;
 }

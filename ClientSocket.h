@@ -16,6 +16,7 @@ class ClientSocket
         void SetTimeout ();
 		int ReadPacket(Buffer& packet) const;
 		int WritePacket (const Buffer& packet) const;
+        bool IsAlive() const;
 
 		~ClientSocket ();
 

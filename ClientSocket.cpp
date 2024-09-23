@@ -15,23 +15,10 @@
 #include <stdio.h>
 
 #include "Logger.h"
+#include "HTTPPacket.h"
 
 using namespace std;
 
-namespace
-{
-    bool IsEndPacket(const int offset, const Buffer &buffer)
-    { 
-        string endPacket = "\r\n\r\n";
-        auto eSize = endPacket.size();
-        if (offset>=eSize)
-        {
-            auto l = buffer.substr(offset-eSize, eSize);
-            return l==endPacket;
-        }
-        return false;
-    }
-}
 
 ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
@@ -66,6 +53,17 @@ bool ClientSocket::Connect(const std::string& ip, int port)
     return true;
 }
 
+bool ClientSocket::IsAlive() const 
+{
+    fd_set sockets;
+    FD_ZERO(&sockets);
+    FD_SET(m_socket, &sockets);
+
+    struct timeval  tv={1, 0};
+    int r = select(m_socket+1, &sockets, NULL, NULL, &tv);
+    return r>0;
+}
+
 int ClientSocket::ReadPacket(Buffer& buffer) const
 {	
 	buffer.resize(65535);
@@ -75,11 +73,9 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
 	{
 		offset += size;
 
-        if (IsEndPacket(offset, buffer))
+        if (HTTPPacket::IsBlankLine(offset, buffer))
         {
-            //if we have Content-length
-            //we should read content length and keep recv
-            Log() << "stop reading from socket" << std::endl;
+            Log() << "stop reading from socket (found blank line) " << std::endl;
             break;
         }
 		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
@@ -89,7 +85,7 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
     if ( size<=0 )
     {
         if (size<0)
-            LogError() << " errno recv '" + to_string(errno) <<"' "<< std::endl;
+            LogError() << " errno recv '" + to_string(errno) + "' size " + to_string(size) << std::endl;
         return size;
     }
 

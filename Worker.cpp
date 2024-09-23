@@ -45,11 +45,11 @@ namespace Commander
             return false;
         }
 
-        cout << "Open ' "+ fullPath + "' " << endl;
+        Log() << "Open ' "+ fullPath + "' " << endl;
         stringstream body;
         body << file.rdbuf();
 
-        Buffer message = HTTPResponses::Create200(body.str(), contentType);
+        Buffer message = HTTPResponses::Create200(body.str(), contentType, true);
         int result = cs.WritePacket (message);
         if (result<=0)
         { 
@@ -75,9 +75,6 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
         using namespace std;
         do
         {
-            bool isKeepAlive = false;
-	        if (keepThreadRunning == false)
-                break;
 
             int socket = stack.GetSocket();
             if (socket==-1)
@@ -85,12 +82,18 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
 
             ClientSocket cs(socket);
             cs.SetTimeout();
+            bool isKA = true;
+            while (isKA && keepThreadRunning){
 
-            do
-            {
                 stringstream ss;
                 ss << std::this_thread::get_id();
                 Log() << "Thread id " + ss.str() << std::endl;
+
+                if (!cs.IsAlive())
+                {
+                    Log() << "Socket is not alive" << endl;
+                    break;
+                }
 
                 Buffer buffer;
                 int result = cs.ReadPacket(buffer);
@@ -101,8 +104,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
                 }
 
                 Packet packet = HTTPPacket::Parse (buffer);
-                isKeepAlive = packet.IsKeepAlive();
-
+                isKA = packet.IsKeepAlive();
                 if (packet.IsGETMethod())
                 {
                     bool isProcessed= Commander::ProcessGET (cs, packet, directory);
@@ -111,10 +113,10 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
                        break; 
                     }
                 }
-
             }
-            while (isKeepAlive && keepThreadRunning);
-        
+
+            Log() << "Connection: Close" << endl;
+
         }
         while(keepThreadRunning);
 
