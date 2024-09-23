@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 typedef std::string Buffer;
 
@@ -47,13 +48,19 @@ struct Packet
 
     bool IsKeepAlive() const 
     {
-        return std::string("keep-alive")==params.at("Connection");
+        std::string val = params.at("Connection");
+        std::transform(begin(val), end(val), begin(val), [](char c)
+                {
+                    return tolower(c);
+                });
+        return std::string("keep-alive")==val;
     }
 };
 
 namespace HTTPPacket
 {
         std::string ExtractField(const Buffer& buffer, const std::string& field);
+        bool IsBlankLine(const int offset, const Buffer &buffer);
 		Packet Parse (const Buffer& buffer);
 		std::vector<std::string> Split (const Buffer& buffer);
 }
@@ -65,10 +72,10 @@ namespace HTTPRequest
 
 namespace HTTPResponses
 {
-		Buffer Create200 (const std::string& dataFile, const std::string &contentType);
+		Buffer Create200 (const std::string& dataFile, const std::string &contentType, bool isKeepAlive=true);
 
-        Buffer Create400();
-		Buffer Create404 ();
+        Buffer Create400(bool isKeepAlive=false);
+		Buffer Create404 (bool isKeepAlive=false);
 }
 
 namespace FileHelper 
