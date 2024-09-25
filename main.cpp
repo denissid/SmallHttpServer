@@ -11,10 +11,11 @@
 #include "Server.h"
 #include "Options.h"
 #include "DaemonHelper.h"
-#include "Tests.h"
+//#include "Tests.h"
 #include "Worker.h"
 #include "ThreadSafeStack.h"
 #include "Logger.h"
+#include "TLSSocket.h"
 
 extern std::atomic<bool> keepThreadRunning;
 

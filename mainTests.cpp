@@ -1,6 +1,8 @@
 #include <iostream>
 
-#include "Tests.h"
+#include "Tests/Tests.h"
+#include "Tests/TLSTests.h"
+
 #include "ClientSocket.h"
 #include "HTTPPacket.h"
 
@@ -61,6 +63,8 @@ int main (int argc, char** argv)
 	TestGETParse();
 	TestSplit();
     TestGetContentType();
+
+    TestTLSCreating();
 
     return 0;
     const int max=800;

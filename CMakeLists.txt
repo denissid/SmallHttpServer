@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 
 project(small_http)
 
@@ -15,11 +15,15 @@ set (SOURCES_FILES_TEST mainTests.cpp)
 
 
 set (SOURCES_FILES  Options.cpp Server.cpp  ClientSocket.cpp
-     HTTPPacket.cpp  Worker.cpp  ThreadSafeStack.cpp nlohmann/json.hpp Logger.cpp)
+    HTTPPacket.cpp  Worker.cpp  ThreadSafeStack.cpp nlohmann/json.hpp Logger.cpp TLSSocket.h)
 
 set (CMAKE_CXX_FLAGS "-std=c++14 -pthread")
+
+find_package(OpenSSL REQUIRED)
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
 add_executable (final ${PROJECT_SOURCE_DIR}/${SOURCES_FILES} ${PROJECT_SOURCE_DIR}/${SOURCES_FILES_MAIN})
 add_executable (tests ${PROJECT_SOURCE_DIR}/${SOURCES_FILES} ${PROJECT_SOURCE_DIR}/${SOURCES_FILES_TEST} )
+target_link_libraries(tests OpenSSL::SSL)
+target_link_libraries (tests OpenSSL::Crypto)
