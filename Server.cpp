@@ -26,90 +26,17 @@ extern std::atomic<bool> keepThreadRunning;
 
 namespace 
 {
-
-	int SetNonblock(int fd)
-	{
-		int flags = 0;
-	#if defined(O_NONBLOCK)
-		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
-			flags = 0;
-		return fcntl (fd, F_SETFL, flags| O_NONBLOCK);
-	#else
-		flags = 1;
-		return ioctl(fd, FIOBIO, &flags);
-	#endif
-	}
-
-	int SetBlock(int fd)
-	{
-		int flags = 0;
-	#if defined(O_NONBLOCK)
-		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
-			flags = 0;
-        flags &= ~O_NONBLOCK;
-        Log() << "flags " << flags << endl;
-		return fcntl (fd, F_SETFL, flags);
-	#else
-		return ioctl(fd, FIOBIO, &flags);
-	#endif
-	}
-
-
-	void SetReuseSocket(int fd)
-	{
-		int reuse = 1;
-		int result = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-		if (reuse<0)
-		{
-			LogError() << "set socket option " << errno;
-		}
-	}
-
 	const int max_events = 300;
 }
 
-Server::Server (const std::string& address, const std::string &family, int port): m_masterSocket(-1), m_epoll(-1)
+Server::Server (): m_epoll(-1)
 {
-    Log() << "Configure local address " << std::endl;
-	Log() << "Create master socket " + address +  ":" + to_string(port) << std::endl;
-
-	m_masterSocket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	sockaddr_in sockAddr = {0};
-	sockAddr.sin_family = AF_INET;
-	sockAddr.sin_port = htons(port);
-    int f = family==ipFamily::ip4 ? AF_INET : AF_INET6;
-
-	if (inet_pton(f, address.c_str(), &(sockAddr.sin_addr)) == 0)
-	{
-		throw NetException("Error convert ip address");
-	}
-
-	SetReuseSocket(m_masterSocket);
-
-	Log() << "Bind master socket" << std::endl;
-	int errb = bind (m_masterSocket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
-	if (errb==-1)
-	{
-	    perror("error ");
-		throw NetException("BIND error");
-	}
-	
-	SetNonblock(m_masterSocket);
-
-	Log() << "Make master socket listened" << endl;
-	listen (m_masterSocket, SOMAXCONN);
-	
 	Log() << "Create epoll descriptor" <<endl;
 	m_epoll = epoll_create1(0);
 	if (m_epoll==-1)
 	{
-		throw NetException("Epoll create");
+		throw NetException("Error epoll create");
 	}
-	
-	Log() << "Added master socket in epoll" <<endl;
-
-    AddSocket(m_masterSocket);
 }
 
 int Server::WaitClients()
@@ -121,20 +48,20 @@ int Server::WaitClients()
 		if (countEvents==-1)
 		{
 			perror("WaitClient ");
-			throw NetException("Epoll_wait create");
+			throw NetException("Error epoll_wait create");
 		}
 
         Log() << "Count events " + to_string(countEvents) << std::endl;
 
 		for ( size_t i = 0; i < countEvents; ++i)
 		{
-			if (Events[i].data.fd == m_masterSocket)
+			if (Events[i].data.fd==m_serverSocket.Get())
 			{
 				Log() << "Accept socket " << endl;
 
                 sockaddr_storage client_address = {0};
                 socklen_t client_len = sizeof(client_address);
-				int clientSocket = accept (m_masterSocket, (sockaddr*)&client_address, &client_len);
+				int clientSocket = accept (m_serverSocket.Get(), (sockaddr*)&client_address, &client_len);
                 char address_buffer[100]={0};
                 getnameinfo((sockaddr*) &client_address, client_len, address_buffer, sizeof(address_buffer), 0, 0, NI_NUMERICHOST);
 
@@ -172,6 +99,12 @@ void Server::DeleteSocket (int socket)
 
 }
 
+void Server::AddSocket(ServerSocket &s)
+{
+    m_serverSocket = std::move(s);
+    AddSocket(m_serverSocket.Get());
+}
+
 void Server::AddSocket (int socket)
 {	
     epoll_event event = {0};
@@ -182,15 +115,13 @@ void Server::AddSocket (int socket)
     if (err==-1)
 	{
 		LogError() << "epoll_ctl add socket" + to_string(errno) << std::endl;
-		throw NetException("Epoll_ctl create");
+		throw NetException("add socket in epoll");
 	}
 }
 
 Server::~Server ()
 {	
-    DeleteSocket(m_masterSocket);
+    DeleteSocket(m_serverSocket.Get());
 
-	Log() << "Master socket closed" << std::endl;
-	close (m_masterSocket);
 }
 

@@ -1,24 +1,27 @@
 #pragma one
 
 #include <string>
+#include "ServerSocket.h"
 
 class Server 
 {
-	    int m_masterSocket;
 	    int m_epoll;
+        ServerSocket m_serverSocket;
 	
 	public:
         
-		Server (const std::string& address, const std::string &family, int port);
-		int WaitClients();
-
+		Server ();
 		~Server ();
+
+		int WaitClients();
+        void CreateEpoll();
+        void AddSocket(ServerSocket &s);
+        void AddSocket (int socket);
 
 		Server(const Server&) = delete;
 		Server& operator= (const Server&) = delete;
 
     private:
         
-        void AddSocket (int socket);
         void DeleteSocket (int socket);
 };

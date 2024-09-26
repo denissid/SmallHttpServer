@@ -15,7 +15,7 @@ set (SOURCES_FILES_TEST mainTests.cpp)
 
 
 set (SOURCES_FILES  Options.cpp Server.cpp  ClientSocket.cpp
-    HTTPPacket.cpp  Worker.cpp  ThreadSafeStack.cpp nlohmann/json.hpp Logger.cpp TLSSocket.h)
+    HTTPPacket.cpp  Worker.cpp  ThreadSafeStack.cpp nlohmann/json.hpp Logger.cpp ServerSocket.cpp)
 
 set (CMAKE_CXX_FLAGS "-std=c++14 -pthread")
 

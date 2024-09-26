@@ -9,9 +9,9 @@
 #include <atomic>
 
 #include "Server.h"
+#include "ServerSocket.h"
 #include "Options.h"
 #include "DaemonHelper.h"
-//#include "Tests.h"
 #include "Worker.h"
 #include "ThreadSafeStack.h"
 #include "Logger.h"
@@ -52,7 +52,10 @@ int main (int argc, char** argv)
 		Log() << options.GetDirectory() << endl;
 		
 	//	MakeDaemon();
-		Server server (options.GetIP(), options.GetIPFamily(), options.GetPort());
+		Server server;
+        ServerSocket ssocket(options.GetIP(), options.GetIPFamily(), options.GetPort());
+
+        server.AddSocket(ssocket);
 
 		ThreadSafeStack stack;
 		CreateThreads (stack, options.GetDirectory());
