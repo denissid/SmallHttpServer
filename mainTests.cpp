@@ -16,10 +16,8 @@
 #include <thread>
 #include <atomic>
 
-std::atomic <int> cTimeout{0};
-std::atomic <int> cThreads{0};
 
-void SndRcvClient()
+void TestSndRcv()
 { 
     int s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -29,32 +27,27 @@ void SndRcvClient()
     cSocket.SetTimeout();
 
     Buffer packetGet = HTTPRequest::CreateGET("127.0.0.1", "49001");
-    int i=10;
-    do
+
+    int result1 = cSocket.WritePacket(packetGet);
+    if (result1<=0)
     {
-        int result1 = cSocket.WritePacket(packetGet);
-        if (result1<=0)
-        {
-            perror ("Writepacket ");
-            cTimeout++;
-            std::cout << "error packet write " << result1 << std::endl;
-            break;
-        }
+        perror ("Writepacket ");
+        std::cout << "error packet write " << result1 << std::endl;
+        assert (!"Erro Write packet");
+        return;
+    }
 
-        Buffer packet;
-        int result = cSocket.ReadPacket(packet);
-        if (result<=0)
-        {
-            perror ("Readpacket ");
-            cTimeout++;
-            std::cout << "error packet read " << result << std::endl;
-            break;
-         }
-        //std::cout << packet;
-    } while(--i);
+    Buffer packet;
+    int result = cSocket.ReadPacket(packet);
+    if (result<=0)
+    {
+        perror ("Readpacket ");
+        std::cout << "error packet read " << result << std::endl;
+        assert(!"Read packet");
+        return;
+     }
 
-    cThreads++;
-    std::cout << "STOP THREAD " << cThreads << std::endl;
+    //std::cout << packet << std::endl;
 }
 
 int main (int argc, char** argv)
@@ -63,26 +56,9 @@ int main (int argc, char** argv)
 	TestGETParse();
 	TestSplit();
     TestGetContentType();
+//    TestSndRcv();
 
     TestTLSCreating();
 
-    return 0;
-    const int max=800;
-    int i=5, z=max;
-    do 
-    {
-        std::thread thr (SndRcvClient);
-        thr.detach();
-        if (z<=0)
-        {
-            sleep(1);
-            z=max;
-        }
-        z--;
-    }while(--i);
-
-    sleep(2);
-    std::cout << "timeout " <<cTimeout << std::endl;
-    std::cout << "closed " <<cThreads;
 	return 0;
 }
