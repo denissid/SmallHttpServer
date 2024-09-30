@@ -32,33 +32,37 @@ class TLSSocket
                 std::cout << "Error use cerificate file" << std::endl;
                 return;
             }
+        }
 
+        bool accept(int socket) 
+        { 
             m_ssl = SSL_new(m_ctx);
             if(!m_ssl)
             {
                 std::cout << "Error SSL_new" << std::endl;
             }
-        }
 
-        void setSocket(int socket)
-        {
+
             SSL_set_fd(m_ssl, socket);
-        }
 
-        void accept() 
-        {
             if (SSL_accept(m_ssl)<=0)
             {
-                std::cout << "Error accept" << std::endl;
+                std::cout << "Error SSL accept" << std::endl;
+                ERR_print_errors_fp(stderr);
+                shutdown();
+                SSL_free(m_ssl);
+                return false;
             }
 
             std::cout << "Using " << SSL_get_cipher(m_ssl) << std::endl;
+            return true;
         }
 
         void read ()
         {
             char request[1024] = {0};
             SSL_read(m_ssl, request, 1024);
+            std::cout << "'" << request << "'" ;
         }
 
         void write()

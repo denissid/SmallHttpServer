@@ -57,17 +57,7 @@ int Server::WaitClients()
 		{
 			if (Events[i].data.fd==m_serverSocket.Get())
 			{
-				Log() << "Accept socket " << endl;
-
-                sockaddr_storage client_address = {0};
-                socklen_t client_len = sizeof(client_address);
-				int clientSocket = accept (m_serverSocket.Get(), (sockaddr*)&client_address, &client_len);
-                char address_buffer[100]={0};
-                getnameinfo((sockaddr*) &client_address, client_len, address_buffer, sizeof(address_buffer), 0, 0, NI_NUMERICHOST);
-
-                string s(address_buffer);
-                Log() << s << std::endl;
-
+                int clientSocket = m_serverSocket.Accept();
 				//SetNonblock(clientSocket);
                 AddSocket(clientSocket);
 			}
@@ -122,6 +112,5 @@ void Server::AddSocket (int socket)
 Server::~Server ()
 {	
     DeleteSocket(m_serverSocket.Get());
-
 }
 

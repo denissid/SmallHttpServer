@@ -7,9 +7,10 @@ class ServerSocket
 
     public:
         ServerSocket():m_socket(-1){}
-		ServerSocket(const std::string& address, const std::string &family, int port);
+		ServerSocket(const std::string& address, const std::string &family, int port, bool isBlock);
         ~ServerSocket();
 
+        int Accept();
         int Get() const;
 
         ServerSocket(const ServerSocket&) = delete;

@@ -1,8 +1,16 @@
-{
+[{
     "_ipfamily":"ip6",
     "ipfamily":"ip4",
 	"_address":"::0",
 	"address":"192.168.100.8",
 	"port":2000,
-	"directory":"html"
-}
+	"directory":"html",
+    "secure":"false"
+},
+{
+    "ipfamily":"ip4",
+	"address":"192.168.100.8",
+	"port":8080,
+	"directory":"html",
+    "secure":"true"
+}]

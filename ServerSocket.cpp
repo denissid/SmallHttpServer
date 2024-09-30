@@ -61,7 +61,7 @@ namespace
 }
 
 
-ServerSocket::ServerSocket(const std::string& address, const std::string &family, int port)
+ServerSocket::ServerSocket(const std::string& address, const std::string &family, int port, bool isBlock)
 {
     Log() << "Configure local address " << std::endl;
 	Log() << "Create master socket " + address +  ":" + to_string(port) << std::endl;
@@ -88,10 +88,33 @@ ServerSocket::ServerSocket(const std::string& address, const std::string &family
 		throw NetException("BIND error");
 	}
 	
-	SetNonblock(m_socket);
+    if (!isBlock)
+	    SetNonblock(m_socket);
 
 	Log() << "Make master socket listened" << endl;
 	listen (m_socket, SOMAXCONN);
+}
+
+int ServerSocket::Accept()
+{	
+
+    Log() << "Accept socket " << endl;
+
+    sockaddr_storage clientAddress = {0};
+    socklen_t clientLen = sizeof(clientAddress);
+    int clientSocket = accept (m_socket, (sockaddr*)&clientAddress, &clientLen);
+    if (clientSocket<0)
+    {
+        LogError() << errno << std::endl;
+    }
+    char address_buffer[100]={0};
+    getnameinfo((sockaddr*) &clientAddress, clientLen, address_buffer, sizeof(address_buffer),
+            0, 0, NI_NUMERICHOST);
+
+    string s(address_buffer);
+    Log() << s << std::endl;
+
+    return clientSocket;
 }
 
 int ServerSocket::Get() const

@@ -1,4 +1,5 @@
 #include "TLSSocket.h"
+#include "ServerSocket.h"
 
 void TestTLSCreating()
 {
@@ -8,14 +9,20 @@ void TestTLSCreating()
 }
 
 void TestTLSSnd()
-{ 
-    /*
+{
     TLSSocket tls;
+    
+    ServerSocket s("127.0.0.1", "ip4", 8080, true); 
 
-    tls.setSocket();
-    tls.accept();
+    int clientSocket = 0;
+    do {
 
-    tls.write()*/;
+        clientSocket = s.Accept();
+        std::cout << clientSocket << std::endl;
+    } while (!tls.accept(clientSocket));
+
+    tls.read();
+  //  tls.write();
 }
 
 void TestTLSRcv()

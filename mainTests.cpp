@@ -52,13 +52,15 @@ void TestSndRcv()
 
 int main (int argc, char** argv)
 {
-    TestExtract();
-	TestGETParse();
-	TestSplit();
-    TestGetContentType();
-//    TestSndRcv();
+    //TestExtract();
+	//TestGETParse();
+	//TestSplit();
+    //TestGetContentType();
 
-    TestTLSCreating();
+//    TestSndRcv();
+    //TestTLSCreating();
+    
+    TestTLSSnd();
 
 	return 0;
 }

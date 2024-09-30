@@ -53,7 +53,7 @@ int main (int argc, char** argv)
 		
 	//	MakeDaemon();
 		Server server;
-        ServerSocket ssocket(options.GetIP(), options.GetIPFamily(), options.GetPort());
+        ServerSocket ssocket(options.GetIP(), options.GetIPFamily(), options.GetPort(), false);
 
         server.AddSocket(ssocket);
 
