@@ -4,8 +4,6 @@
 void TestTLSCreating()
 {
     TLSSocket tls;
-
-
 }
 
 void TestTLSSnd()

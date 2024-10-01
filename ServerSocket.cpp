@@ -61,7 +61,7 @@ namespace
 }
 
 
-ServerSocket::ServerSocket(const std::string& address, const std::string &family, int port, bool isBlock)
+ServerSocket::ServerSocket(const std::string& address, const std::string &family, int port, bool isBlock, bool isSecure): m_isSecure(isSecure)
 {
     Log() << "Configure local address " << std::endl;
 	Log() << "Create master socket " + address +  ":" + to_string(port) << std::endl;
@@ -97,7 +97,6 @@ ServerSocket::ServerSocket(const std::string& address, const std::string &family
 
 int ServerSocket::Accept()
 {	
-
     Log() << "Accept socket " << endl;
 
     sockaddr_storage clientAddress = {0};
@@ -122,6 +121,11 @@ int ServerSocket::Get() const
     return m_socket;
 }
 
+bool ServerSocket::IsSecure() const
+{
+    return m_isSecure;
+}
+
 ServerSocket::~ServerSocket()
 {
     if (m_socket>=0)
@@ -133,5 +137,11 @@ ServerSocket& ServerSocket::operator= (ServerSocket&& t)
     m_socket = std::move(t.m_socket);
     t.m_socket = -1;
     return *this;
+}
+
+ServerSocket::ServerSocket (ServerSocket&& t)
+{
+    m_socket = std::move(t.m_socket);
+    t.m_socket = -1;
 }
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <atomic>
+#include <algorithm>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -55,11 +56,26 @@ int Server::WaitClients()
 
 		for ( size_t i = 0; i < countEvents; ++i)
 		{
-			if (Events[i].data.fd==m_serverSocket.Get())
+            int masterSocket = Events[i].data.fd;
+            auto s = std::find_if( begin(m_serverSockets),
+                          end(m_serverSockets),
+                          [masterSocket] (const ServerSocket &s)
+                          {
+                            return s.Get()==masterSocket;
+                          });
+                          
+			if (s!=end(m_serverSockets))
 			{
-                int clientSocket = m_serverSocket.Accept();
+                if (!s->IsSecure())
+                {
+                    int clientSocket = s->Accept();
 				//SetNonblock(clientSocket);
-                AddSocket(clientSocket);
+                    AddSocket(clientSocket);
+                }
+                else
+                {
+                    int clientSocket = s->Accept();
+                }
 			}
 			else
 			{	
@@ -91,8 +107,8 @@ void Server::DeleteSocket (int socket)
 
 void Server::AddSocket(ServerSocket &s)
 {
-    m_serverSocket = std::move(s);
-    AddSocket(m_serverSocket.Get());
+    AddSocket(s.Get());
+    m_serverSockets.push_back(std::move(s));
 }
 
 void Server::AddSocket (int socket)
@@ -111,6 +127,11 @@ void Server::AddSocket (int socket)
 
 Server::~Server ()
 {	
-    DeleteSocket(m_serverSocket.Get());
+    for_each(begin(m_serverSockets), end(m_serverSockets), [this] (const ServerSocket &s)
+                {
+                    DeleteSocket(s.Get());
+                }
+            );
+
 }
 

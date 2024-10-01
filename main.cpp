@@ -46,19 +46,18 @@ int main (int argc, char** argv)
 	{
 		Options options(argc, argv);
 
-		Log() << options.GetIPFamily() << endl;
-		Log() << options.GetIP() << endl;
-		Log() << options.GetPort() << endl;
-		Log() << options.GetDirectory() << endl;
-		
 	//	MakeDaemon();
+		size_t size = options.GetSize();
 		Server server;
-        ServerSocket ssocket(options.GetIP(), options.GetIPFamily(), options.GetPort(), false);
-
-        server.AddSocket(ssocket);
+        for (int i=0; i<size; ++i)
+        {
+            ServerSocket ssocket(options.GetIP(i), options.GetIPFamily(i), 
+                    options.GetPort(i), false, options.IsSecure(i));
+            server.AddSocket(ssocket);
+        }
 
 		ThreadSafeStack stack;
-		CreateThreads (stack, options.GetDirectory());
+		CreateThreads (stack, options.GetDirectory(0));
 
         this_thread::sleep_for(1s);
 		do

@@ -55,24 +55,34 @@ Options::Options(int argc, char** argv)
 	LoadConfig(commandOption);
 }
 
-std::string Options::GetIPFamily() const
+std::string Options::GetIPFamily(int index) const
 {
-    return m_options[0].m_familyAddress;
+    return m_options[index].m_familyAddress;
 }
 
-std::string Options::GetIP () const
+std::string Options::GetIP (int index) const
 {
-	return m_options[0].m_ipAddress;
+	return m_options[index].m_ipAddress;
 }
 
-int Options::GetPort() const
+int Options::GetPort(int index) const
 {
-	return m_options[0].m_port;
+	return m_options[index].m_port;
 }
 
-std::string Options::GetDirectory() const
+std::string Options::GetDirectory(int index) const
 {
-	return m_options[0].m_directory;
+	return m_options[index].m_directory;
+}
+
+bool Options::IsSecure(int index) const 
+{
+	return m_options[index].m_isSecure;
+}
+
+size_t Options::GetSize() const
+{
+    return m_options.size();
 }
 
 void Options::LoadConfig(const Option &defOption)

@@ -45,10 +45,13 @@ class Options
 		Options(int argc, char** argv);
 		~Options();
 
-        std::string GetIPFamily() const;
-		std::string GetIP() const;
-		int GetPort() const;
-		std::string GetDirectory() const;
+        std::string GetIPFamily(int index) const;
+		std::string GetIP(int index) const;
+		int GetPort(int index) const;
+		std::string GetDirectory(int index) const;
+        bool IsSecure(int index) const;
+
+        size_t GetSize() const;
 
 	private:
 		

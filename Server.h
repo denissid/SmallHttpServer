@@ -1,12 +1,14 @@
 #pragma one
 
 #include <string>
+#include <vector>
+
 #include "ServerSocket.h"
 
 class Server 
 {
-	    int m_epoll;
-        ServerSocket m_serverSocket;
+	    int m_epoll = -1;
+        std::vector<ServerSocket> m_serverSockets;
 	
 	public:
         
@@ -16,12 +18,12 @@ class Server
 		int WaitClients();
         void CreateEpoll();
         void AddSocket(ServerSocket &s);
-        void AddSocket (int socket);
 
 		Server(const Server&) = delete;
 		Server& operator= (const Server&) = delete;
 
     private:
         
+        void AddSocket (int socket);
         void DeleteSocket (int socket);
 };
