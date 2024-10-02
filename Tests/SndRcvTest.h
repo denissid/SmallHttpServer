@@ -52,7 +52,6 @@ static void StartServer()
         assert (!"Erro Write packet");
         return;
     }
-
 }
 
 static void TestSndRcv()
@@ -87,8 +86,6 @@ static void TestSndRcv()
         assert(!"Read packet");
         return;
      }
-
-    
 
     thr.join();
 

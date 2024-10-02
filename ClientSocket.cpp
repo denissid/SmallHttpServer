@@ -64,9 +64,11 @@ bool ClientSocket::IsAlive() const
     return r>0;
 }
 
-int ClientSocket::ReadPacket(Buffer& buffer) const
+#include <functional>
+
+int Read (Buffer &buffer, int socket, std::function<int(int, void*, size_t, int)> f)
 {	
-	buffer.resize(65535);
+    buffer.resize(65535);
 	
 	int size = 0, offset = 0;
 	do
@@ -78,7 +80,7 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
             Log() << "stop reading from socket (found blank line) " << std::endl;
             break;
         }
-		size  = recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
+		size  = f (socket, (void*)&buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
     }
 	while ( size>0 );
 
@@ -92,6 +94,13 @@ int ClientSocket::ReadPacket(Buffer& buffer) const
 	Log() << "Size packet '" + to_string(offset) + "' " << std::endl;
 	buffer.resize (offset);
     return offset;
+
+}
+
+int ClientSocket::ReadPacket(Buffer& buffer) const
+{
+    //recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL)
+    return Read (buffer, m_socket, recv);
 }
 
 int ClientSocket::WritePacket (const Buffer& buffer) const 

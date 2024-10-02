@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HTTPPacket.h"
 #include <iostream>
 
 #include <openssl/crypto.h>
@@ -62,14 +63,13 @@ class TLSSocket
         {
         }
 
-        bool accept(int socket, const TLSContext &context) 
+        bool Accept(int socket, const TLSContext &context) 
         { 
             m_ssl = SSL_new(context.Get());
             if(!m_ssl)
             {
                 std::cout << "Error SSL_new" << std::endl;
             }
-
 
             SSL_set_fd(m_ssl, socket);
 
@@ -88,17 +88,20 @@ class TLSSocket
             return true;
         }
 
-        void read ()
+        int ReadPacket (Buffer& packet) const
         {
-            char request[1024] = {0};
-            SSL_read(m_ssl, request, 1024);
-            std::cout << "'" << request << "'" ;
+            packet.resize(65535);
+
+            int size = SSL_read(m_ssl, &packet[0], packet.size());
+            std::cout << "'" << packet << "'" ;
+
+            return -1;
         }
 
-        void write()
+        int WritePacket(const Buffer& packet) const
         {
-            char data[1024] = {0};
-            SSL_write(m_ssl, data, 1024);
+            int size = SSL_write(m_ssl, &packet[0], 1024);
+            return -1;
         }
 
         void shutdown()

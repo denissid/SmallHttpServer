@@ -6,15 +6,15 @@
 
 int main (int argc, char** argv)
 {
-    //TestExtract();
-	//TestGETParse();
-	//TestSplit();
-    //TestGetContentType();
+    TestExtract();
+	TestGETParse();
+	TestSplit();
+    TestGetContentType();
 
     TestSndRcv();
+
     //TestTLSCreating();
-    
- //   TestTLSSnd();
+    //TestTLSSnd();
 
 	return 0;
 }

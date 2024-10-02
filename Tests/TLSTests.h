@@ -1,5 +1,6 @@
 #include "TLSSocket.h"
 #include "ServerSocket.h"
+#include "HTTPPacket.h"
 
 void TestTLSCreating()
 {
@@ -8,7 +9,6 @@ void TestTLSCreating()
 
 void TestTLSSnd()
 {
-    
     ServerSocket s("127.0.0.1", "ip4", 8080, true); 
 
     TLSContext context; 
@@ -18,9 +18,10 @@ void TestTLSSnd()
     do {
 
         clientSocket = s.Accept();
-    } while (!tls.accept(clientSocket, context));
+    } while (!tls.Accept(clientSocket, context));
 
-    tls.read();
+    Buffer packet;
+    tls.ReadPacket(packet);
   //  tls.write();
 }
 
