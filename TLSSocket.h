@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 
 #include <openssl/crypto.h>
@@ -6,15 +8,13 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-class TLSSocket
+class TLSContext 
 {
-    SSL_CTX *m_ctx = nullptr;
-    SSL *m_ssl = nullptr;
+        SSL_CTX *m_ctx = nullptr;
 
     public:
-
-        TLSSocket()
-        {
+        TLSContext()
+        { 
             SSL_library_init();
             OpenSSL_add_all_algorithms();
             SSL_load_error_strings();
@@ -34,9 +34,37 @@ class TLSSocket
             }
         }
 
-        bool accept(int socket) 
+        ~TLSContext()
+        {
+            SSL_CTX_free(m_ctx);
+            m_ctx = nullptr;
+        }
+
+        TLSContext (const TLSContext &) = delete;
+        TLSContext& operator= (const TLSContext&) = delete;
+
+        friend class TLSSocket;
+
+    private: 
+        SSL_CTX *Get() const
+        {
+            return m_ctx;
+        }
+};
+
+class TLSSocket
+{
+        SSL *m_ssl = nullptr;
+
+    public:
+
+        TLSSocket()
+        {
+        }
+
+        bool accept(int socket, const TLSContext &context) 
         { 
-            m_ssl = SSL_new(m_ctx);
+            m_ssl = SSL_new(context.Get());
             if(!m_ssl)
             {
                 std::cout << "Error SSL_new" << std::endl;
@@ -51,6 +79,8 @@ class TLSSocket
                 ERR_print_errors_fp(stderr);
                 shutdown();
                 SSL_free(m_ssl);
+                m_ssl = nullptr;
+
                 return false;
             }
 
@@ -73,12 +103,14 @@ class TLSSocket
 
         void shutdown()
         {
-            SSL_shutdown(m_ssl);
+            if (m_ssl!=nullptr)
+                SSL_shutdown(m_ssl);
         }
 
         ~TLSSocket()
         {
-            SSL_free(m_ssl);
-            SSL_CTX_free(m_ctx);
+            if (m_ssl!=nullptr)
+                SSL_free(m_ssl);
+
         }
 };

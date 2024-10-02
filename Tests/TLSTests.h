@@ -8,16 +8,17 @@ void TestTLSCreating()
 
 void TestTLSSnd()
 {
-    TLSSocket tls;
     
     ServerSocket s("127.0.0.1", "ip4", 8080, true); 
 
+    TLSContext context; 
+
+    TLSSocket tls;
     int clientSocket = 0;
     do {
 
         clientSocket = s.Accept();
-        std::cout << clientSocket << std::endl;
-    } while (!tls.accept(clientSocket));
+    } while (!tls.accept(clientSocket, context));
 
     tls.read();
   //  tls.write();

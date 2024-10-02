@@ -67,7 +67,7 @@ ServerSocket::ServerSocket(const std::string& address, const std::string &family
 	Log() << "Create master socket " + address +  ":" + to_string(port) << std::endl;
 
 	m_socket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
+    Log() << "master socket " + to_string(m_socket) << std::endl;
 	sockaddr_in sockAddr = {0};
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(port);
@@ -135,13 +135,17 @@ ServerSocket::~ServerSocket()
 ServerSocket& ServerSocket::operator= (ServerSocket&& t)
 {
     m_socket = std::move(t.m_socket);
+    m_isSecure = std::move(t.m_isSecure);
     t.m_socket = -1;
+    t.m_isSecure = false;
     return *this;
 }
 
 ServerSocket::ServerSocket (ServerSocket&& t)
 {
     m_socket = std::move(t.m_socket);
+    m_isSecure = std::move(t.m_isSecure);
     t.m_socket = -1;
+    t.m_isSecure = false;
 }
 

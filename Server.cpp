@@ -23,6 +23,7 @@
 
 using namespace std;
 
+//TODO need refactoring 
 extern std::atomic<bool> keepThreadRunning;
 
 namespace 
@@ -57,24 +58,28 @@ int Server::WaitClients()
 		for ( size_t i = 0; i < countEvents; ++i)
 		{
             int masterSocket = Events[i].data.fd;
+            Log() << "master socket " + to_string(masterSocket) << std::endl;
             auto s = std::find_if( begin(m_serverSockets),
-                          end(m_serverSockets),
-                          [masterSocket] (const ServerSocket &s)
-                          {
-                            return s.Get()==masterSocket;
-                          });
+                                   end(m_serverSockets),
+                                   [masterSocket] (const ServerSocket &s)
+                                   {
+                                        return s.Get()==masterSocket;
+                                   });
                           
 			if (s!=end(m_serverSockets))
 			{
                 if (!s->IsSecure())
                 {
+                    Log() << "Connect to  socket  2000 " << std::endl;
                     int clientSocket = s->Accept();
 				//SetNonblock(clientSocket);
                     AddSocket(clientSocket);
                 }
                 else
                 {
+                    Log() << "Connect to secure socket 8080 " << std::endl;
                     int clientSocket = s->Accept();
+
                 }
 			}
 			else
