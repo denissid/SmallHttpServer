@@ -16,6 +16,7 @@
 
 #include "Logger.h"
 #include "HTTPPacket.h"
+#include "SocketHelper.h"
 
 using namespace std;
 
@@ -64,62 +65,14 @@ bool ClientSocket::IsAlive() const
     return r>0;
 }
 
-#include <functional>
-
-int Read (Buffer &buffer, int socket, std::function<int(int, void*, size_t, int)> f)
-{	
-    buffer.resize(65535);
-	
-	int size = 0, offset = 0;
-	do
-	{
-		offset += size;
-
-        if (HTTPPacket::IsBlankLine(offset, buffer))
-        {
-            Log() << "stop reading from socket (found blank line) " << std::endl;
-            break;
-        }
-		size  = f (socket, (void*)&buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-    }
-	while ( size>0 );
-
-    if ( size<=0 )
-    {
-        if (size<0)
-            LogError() << " errno recv '" + to_string(errno) + "' size " + to_string(size) << std::endl;
-        return size;
-    }
-
-	Log() << "Size packet '" + to_string(offset) + "' " << std::endl;
-	buffer.resize (offset);
-    return offset;
-
-}
-
 int ClientSocket::ReadPacket(Buffer& buffer) const
 {
-    //recv (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL)
-    return Read (buffer, m_socket, recv);
+    return Read (buffer, m_socket, MSG_NOSIGNAL);
 }
 
 int ClientSocket::WritePacket (const Buffer& buffer) const 
 {
-	int size = 0, offset = 0;
-	do
-	{
-		offset += size;
-		size = send (m_socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-	}
-	while ( offset<buffer.size() && size>0);
-
-	if ( size<0 )
-	{
-        LogError() << " error send " + to_string(errno) << std::endl;
-        return size;
-	}
-
-    return offset;
+    return Write(buffer, m_socket, MSG_NOSIGNAL);
 }
 
 void ClientSocket::CloseSocket()

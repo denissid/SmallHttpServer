@@ -1,6 +1,5 @@
 #pragma once
 
-#include "HTTPPacket.h"
 #include <iostream>
 
 #include <openssl/crypto.h>
@@ -9,18 +8,21 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#include "HTTPPacket.h"
+#include "SocketHelper.h"
+
 class TLSContext 
 {
         SSL_CTX *m_ctx = nullptr;
 
     public:
-        TLSContext()
+        TLSContext(bool server)
         { 
             SSL_library_init();
             OpenSSL_add_all_algorithms();
             SSL_load_error_strings();
 
-            m_ctx = SSL_CTX_new(TLS_server_method());
+            m_ctx = SSL_CTX_new(server?TLS_server_method():TLS_client_method());
             if (!m_ctx)
             {
                 std::cout << "Error ctx" << std::endl;
@@ -30,6 +32,7 @@ class TLSContext
             if (!SSL_CTX_use_certificate_file(m_ctx, "certificates/cert.pem", SSL_FILETYPE_PEM) ||
                 !SSL_CTX_use_PrivateKey_file(m_ctx, "certificates/key.pem", SSL_FILETYPE_PEM) )
             {
+                SSL_CTX_free(m_ctx);
                 std::cout << "Error use cerificate file" << std::endl;
                 return;
             }
@@ -63,15 +66,53 @@ class TLSSocket
         {
         }
 
-        bool Accept(int socket, const TLSContext &context) 
+        bool Connect(int socket, const std::string &hostname, const TLSContext &context)
         { 
-            m_ssl = SSL_new(context.Get());
-            if(!m_ssl)
+            CreateSSLConnection(socket, context);
+            if (!SSL_set_tlsext_host_name(m_ssl, hostname.data()))
             {
-                std::cout << "Error SSL_new" << std::endl;
+                ERR_print_errors_fp(stderr);
+                std::cout << "Error hostname " << std::endl;
+                return false;
             }
 
-            SSL_set_fd(m_ssl, socket);
+            if (SSL_connect(m_ssl)==-1)
+            {
+                ERR_print_errors_fp(stderr);
+                std::cout << "Error ssl Connect " << std::endl;
+                return false;
+            }
+
+            std::cout << "Using " << SSL_get_cipher(m_ssl) << std::endl;
+
+            X509 *cert = SSL_get_peer_certificate(m_ssl);
+            if (!cert)
+            {
+                std::cout << "ssl peer certificate failed" << std::endl;
+                return false;
+            }
+
+            char* tmp = nullptr;
+            if ((tmp=X509_NAME_oneline(X509_get_subject_name(cert), 0, 0)))
+            {
+                std::cout << "subj" <<tmp ;
+                OPENSSL_free(tmp);
+            }
+
+            if ((tmp=X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0)))
+            {
+                std::cout << "issuer" << tmp;
+                OPENSSL_free(tmp);
+            }
+
+            X509_free(cert);
+
+            return true;
+        }
+
+        bool Accept(int socket, const TLSContext &context) 
+        { 
+            CreateSSLConnection(socket, context);
 
             if (SSL_accept(m_ssl)<=0)
             {
@@ -88,20 +129,14 @@ class TLSSocket
             return true;
         }
 
-        int ReadPacket (Buffer& packet) const
+        int ReadPacket (Buffer& buffer) const
         {
-            packet.resize(65535);
-
-            int size = SSL_read(m_ssl, &packet[0], packet.size());
-            std::cout << "'" << packet << "'" ;
-
-            return -1;
+            return Read (buffer, m_ssl, 0);
         }
 
-        int WritePacket(const Buffer& packet) const
+        int WritePacket(const Buffer& buffer) const
         {
-            int size = SSL_write(m_ssl, &packet[0], 1024);
-            return -1;
+            return Write(buffer, m_ssl, 0);
         }
 
         void shutdown()
@@ -116,4 +151,18 @@ class TLSSocket
                 SSL_free(m_ssl);
 
         }
+
+    private:
+        void CreateSSLConnection(int socket, const TLSContext &context)
+        { 
+            m_ssl = SSL_new(context.Get());
+            if(!m_ssl)
+            {
+                std::cout << "Error SSL_new" << std::endl;
+            }
+
+            SSL_set_fd(m_ssl, socket);
+        }
+
+
 };

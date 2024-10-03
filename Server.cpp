@@ -79,7 +79,7 @@ int Server::WaitClients()
                 {
                     Log() << "Connect to secure socket 8080 " << std::endl;
                     int clientSocket = s->Accept();
-
+                    AddSocket(clientSocket);
                 }
 			}
 			else
