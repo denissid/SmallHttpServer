@@ -1,5 +1,13 @@
 #include "ServerSocket.h"
 
+#include "Exceptions.h"
+#include "Logger.h"
+#include "Options.h"
+#include "Socket.h"
+#include "ClientSocket.h"
+#include "TLSSocket.h"
+
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,10 +20,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
-
-#include "Exceptions.h"
-#include "Logger.h"
-#include "Options.h"
 
 using namespace std;
 namespace 
@@ -95,25 +99,11 @@ ServerSocket::ServerSocket(const std::string& address, const std::string &family
 	listen (m_socket, SOMAXCONN);
 }
 
-int ServerSocket::Accept()
+std::unique_ptr<Socket> ServerSocket::Accept(const Acceptor& acceptor)
 {	
     Log() << "Accept socket " << endl;
 
-    sockaddr_storage clientAddress = {0};
-    socklen_t clientLen = sizeof(clientAddress);
-    int clientSocket = accept (m_socket, (sockaddr*)&clientAddress, &clientLen);
-    if (clientSocket<0)
-    {
-        LogError() << errno << std::endl;
-    }
-    char address_buffer[100]={0};
-    getnameinfo((sockaddr*) &clientAddress, clientLen, address_buffer, sizeof(address_buffer),
-            0, 0, NI_NUMERICHOST);
-
-    string s(address_buffer);
-    Log() << s << std::endl;
-
-    return clientSocket;
+    return acceptor();
 }
 
 int ServerSocket::Get() const

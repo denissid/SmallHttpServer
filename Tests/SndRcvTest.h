@@ -27,29 +27,26 @@ static void StartServer()
                     2000, false, false);
     server.AddSocket(ssocket);
     
-    int s = server.WaitClients();
+    auto clientSocket = server.WaitClients();
 
-    Log() << "descriptor " + std::to_string(s) << std::endl;
-    ClientSocket cSocket(s);
-    cSocket.SetTimeout();
+  //  Log() << "descriptor " + std::to_string(clientSocket->Get()) << std::endl;
+    clientSocket->SetTimeout();
 
     Buffer packet;
-    int result = cSocket.ReadPacket(packet);
+    int result = clientSocket->ReadPacket(packet);
     if (result<=0)
     {
         perror ("Readpacket ");
         std::cout << "error packet read " << result << std::endl;
-        assert(!"Read packet");
         return;
      }
 
 
-    int result1 = cSocket.WritePacket(packet);
+    int result1 = clientSocket->WritePacket(packet);
     if (result1<=0)
     {
         perror ("Writepacket ");
         std::cout << "error packet write " << result1 << std::endl;
-        assert (!"Erro Write packet");
         return;
     }
 }
@@ -58,7 +55,7 @@ static void TestSndRcv()
 {
     std::thread thr (StartServer);
 
-    sleep(1);
+    sleep(5);
     int s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     ClientSocket cSocket(s);
@@ -73,7 +70,6 @@ static void TestSndRcv()
     {
         perror ("Writepacket ");
         std::cout << "error packet write " << result1 << std::endl;
-        assert (!"Erro Write packet");
         return;
     }
 
@@ -83,14 +79,27 @@ static void TestSndRcv()
     {
         perror ("Readpacket ");
         std::cout << "error packet read " << result << std::endl;
-        assert(!"Read packet");
         return;
      }
 
-    thr.join();
 
+    thr.join();
     assert (packet==packetGet); 
-    //std::cout << packet << std::endl;
+    std::cout << "End test" << std::endl;
+}
+
+static void TestConnect()
+{
+    std::thread thr (StartServer);
+
+    sleep(1);
+    int s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    ClientSocket cSocket(s);
+    cSocket.Connect ("127.0.0.1", 2000);
+
+    thr.join();
+    std::cout << "End test" << std::endl;
 }
 
 

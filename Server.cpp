@@ -15,6 +15,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
+#include <future>
 
 #include "Exceptions.h"
 #include "Logger.h"
@@ -31,7 +32,7 @@ namespace
 	const int max_events = 300;
 }
 
-Server::Server (): m_epoll(-1)
+Server::Server (): m_epoll(-1), m_tlsContext(true)
 {
 	Log() << "Create epoll descriptor" <<endl;
 	m_epoll = epoll_create1(0);
@@ -41,10 +42,11 @@ Server::Server (): m_epoll(-1)
 	}
 }
 
-int Server::WaitClients()
+std::unique_ptr<Socket> Server::WaitClients()
 {
 	do
 	{
+       // Log() << "WAIT " << std::endl;
 		epoll_event Events[max_events] = {0};
 		const size_t countEvents = epoll_wait(m_epoll, Events, max_events, -1);
 		if (countEvents==-1)
@@ -68,32 +70,25 @@ int Server::WaitClients()
                           
 			if (s!=end(m_serverSockets))
 			{
-                if (!s->IsSecure())
+                if (s->IsSecure())
                 {
-                    Log() << "Connect to  socket  2000 " << std::endl;
-                    int clientSocket = s->Accept();
-				//SetNonblock(clientSocket);
-                    AddSocket(clientSocket);
+                    Log() << "Connect to secure socket 8080 " << std::endl;
+                    Acceptor acceptor(s->Get(), &m_tlsContext);
+                    return s->Accept(acceptor);
                 }
                 else
                 {
-                    Log() << "Connect to secure socket 8080 " << std::endl;
-                    int clientSocket = s->Accept();
-                    AddSocket(clientSocket);
+                    Log() << "Connect to  socket  2000 " << std::endl;
+                    Acceptor acceptor(s->Get());
+                    return s->Accept(acceptor);
                 }
-			}
-			else
-			{	
-                DeleteSocket(Events[i].data.fd);
-
-				Log() << "Start read slave socket" << endl;
-				return Events[i].data.fd;
+                
 			}
 		}
 	}
 	while(keepThreadRunning);
 
-    return -1;
+    return nullptr;
 }
 
 void Server::DeleteSocket (int socket)
@@ -122,7 +117,6 @@ void Server::AddSocket (int socket)
 	event.data.fd = socket;
 	event.events = EPOLLIN;
 	int err = epoll_ctl(m_epoll, EPOLL_CTL_ADD, socket, &event);
-
     if (err==-1)
 	{
 		LogError() << "epoll_ctl add socket" + to_string(errno) << std::endl;
@@ -132,11 +126,12 @@ void Server::AddSocket (int socket)
 
 Server::~Server ()
 {	
-    for_each(begin(m_serverSockets), end(m_serverSockets), [this] (const ServerSocket &s)
-                {
-                    DeleteSocket(s.Get());
-                }
-            );
+    for_each(begin(m_serverSockets), end(m_serverSockets), 
+            [this] (const ServerSocket &s)
+            {
+                DeleteSocket(s.Get());
+            }
+        );
 
 }
 

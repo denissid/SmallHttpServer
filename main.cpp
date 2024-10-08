@@ -62,8 +62,8 @@ int main (int argc, char** argv)
         this_thread::sleep_for(1s);
 		do
 		{
-			int s = server.WaitClients();
-			stack.AddSocket(s);
+			auto s = server.WaitClients();
+			stack.AddSocket(std::move(s));
 		}
 		while(keepThreadRunning);
 	}

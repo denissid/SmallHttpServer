@@ -1,7 +1,11 @@
 #pragma once
 
+#include "Socket.h"
 #include "TLSSocket.h"
+#include "SocketHelper.h"
+
 #include <string>
+#include <memory>
 
 class ServerSocket
 {
@@ -14,7 +18,7 @@ class ServerSocket
 		ServerSocket(const std::string& address, const std::string &family, int port, bool isBlock = false, bool isSecure = false);
         ~ServerSocket();
 
-        int Accept();
+        std::unique_ptr<Socket> Accept(const Acceptor& acceptor);
         int Get() const;
         bool IsSecure() const;
 

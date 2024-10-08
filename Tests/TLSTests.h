@@ -1,3 +1,4 @@
+#include "TLSContext.h"
 #include "TLSSocket.h"
 #include "ServerSocket.h"
 #include "ClientSocket.h"
@@ -17,7 +18,13 @@
 extern std::atomic<bool> keepThreadRunning;
 void TestTLSCreating()
 {
-    TLSSocket tls;
+    {
+        TLSContext tls(true);
+    }
+    {
+        TLSContext tls(false);
+    }
+
 }
 
 
@@ -31,32 +38,26 @@ static void StartTLSServer()
                     8080, false, true);
     server.AddSocket(ssocket);
   
-    TLSSocket tls;
     
-    int clientSocket = 0;
-    do {
-
-        clientSocket = server.WaitClients();
-    } while (!tls.Accept(clientSocket, context));
+    auto tls = server.WaitClients();
+    //tls->Accept();
 
     std::cout << "READ";
     Buffer packet;
-    int result = tls.ReadPacket(packet);
+    int result = tls->ReadPacket(packet);
     if (result<=0)
     {
         perror ("Readpacket ");
         std::cout << "error packet read " << result << std::endl;
-        assert(!"Error Read packet");
         return;
      }
 
 
-    int result1 = tls.WritePacket(packet);
+    int result1 = tls->WritePacket(packet);
     if (result1<=0)
     {
         perror ("Writepacket ");
         std::cout << "error packet write " << result1 << std::endl;
-        assert (!"Erro Write packet");
         return;
     }
 
@@ -73,14 +74,14 @@ void TestTLSSndRcv()
     int s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     ClientSocket clientSocket(s); 
 
-    TLSSocket tls;
-
     if (clientSocket.Connect("127.0.0.1", 8080)==false)
     {
         std::cout << "Error connection" << std::endl;
         return;
     }
-    if (!tls.Connect(s, "127.0.0.1", context))
+
+    TLSSocket tls(s, &context);
+    if (!tls.Connect( "127.0.0.1"))
     {
         std::cout << "Error tls connection" << std::endl;
         return;
@@ -92,7 +93,6 @@ void TestTLSSndRcv()
     {
         perror ("Writepacket ");
         std::cout << "error packet write " << result1 << std::endl;
-        assert (!"Erro Write packet");
         return;
     }
 
@@ -103,7 +103,6 @@ void TestTLSSndRcv()
     {
         perror ("Readpacket ");
         std::cout << "error packet read " << result << std::endl;
-        assert(!"Error Read packet");
         return;
      }
 

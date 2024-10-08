@@ -1,10 +1,40 @@
 #pragma once
 
 #include "Logger.h"
+#include "TLSContext.h"
+
+#include "Socket.h"
+#include "ClientSocket.h"
+#include "TLSSocket.h"
 
 #include <openssl/ssl.h>
 #include <sys/socket.h>
 #include <type_traits>
+#include <unistd.h>
+#include <fcntl.h>
+#include <netdb.h>
+
+#include <string>
+#include <memory>
+
+class Acceptor 
+{
+
+        int m_socket = -1;
+        TLSContext *m_context = nullptr;
+
+    public:
+
+        Acceptor (int masterSocket):m_socket(masterSocket)
+        {
+        }
+
+        Acceptor (int masterSocket, TLSContext *context): m_socket(masterSocket), m_context(context)
+        {
+        }
+
+        std::unique_ptr<Socket>  operator() () const;
+};
 
 template <typename T>
 int Read (Buffer &buffer, T socket, int flags)

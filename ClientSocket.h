@@ -2,9 +2,9 @@
 #include <vector>
 #include <string>
 
-typedef std::string Buffer;
+#include "Socket.h"
 
-class ClientSocket
+class ClientSocket: public Socket
 {
 	    int m_socket;
 
@@ -17,6 +17,10 @@ class ClientSocket
 		int ReadPacket(Buffer& packet) const;
 		int WritePacket (const Buffer& packet) const;
         bool IsAlive() const;
+        int Get() const
+        {
+            return m_socket;
+        }
 
 		~ClientSocket ();
 

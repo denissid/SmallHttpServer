@@ -9,13 +9,14 @@ class Server
 {
 	    int m_epoll = -1;
         std::vector<ServerSocket> m_serverSockets;
-	
+        TLSContext m_tlsContext;
+
 	public:
         
 		Server ();
 		~Server ();
 
-		int WaitClients();
+		std::unique_ptr<Socket> WaitClients();
         void CreateEpoll();
         void AddSocket(ServerSocket &s);
 

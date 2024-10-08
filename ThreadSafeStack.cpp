@@ -6,24 +6,24 @@
 using namespace std;
 using namespace std::chrono_literals;
 
-void ThreadSafeStack::AddSocket(int i)
+void ThreadSafeStack::AddSocket(std::unique_ptr<Socket> i)
 {
     {
 	    lock_guard<mutex> lock(m_mutex);
-	    m_stack.push(i);
+	    m_stack.push(std::move(i));
     }
 	cv.notify_one();
 }
 
-int ThreadSafeStack::GetSocket() const
+ std::unique_ptr<Socket> ThreadSafeStack::GetSocket() const
 {
 	unique_lock<mutex> lock (m_mutex);
 	cv.wait_for(lock, 5s,[this]{return !m_stack.empty();} );
 
     if (m_stack.empty())
-        return -1;
+        return nullptr;
 
-	int s = m_stack.top();
+	auto s = std::move(m_stack.top());
 	m_stack.pop();
 	return s;
 }

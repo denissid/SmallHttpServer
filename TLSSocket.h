@@ -11,25 +11,34 @@
 #include "HTTPPacket.h"
 #include "SocketHelper.h"
 #include "TLSContext.h"
+#include "Socket.h"
 
-class TLSSocket
+class TLSSocket: public Socket
 {
         SSL *m_ssl = nullptr;
+        int m_socket = -1;
+        TLSContext *m_context=nullptr;
 
     public:
 
-        TLSSocket();
+        TLSSocket(int socket, TLSContext *context);
         ~TLSSocket();
 
-        bool Connect(int socket, const std::string &hostname, const TLSContext &context);
-        bool Accept(int socket, const TLSContext &context);
+        bool Connect(const std::string &hostname);
+        bool Accept();
+        void SetTimeout ();
+        bool IsAlive() const;
         int ReadPacket (Buffer& buffer) const;
         int WritePacket(const Buffer& buffer) const;
 
         void shutdown();
 
+        TLSSocket(const TLSSocket&) = delete;
+        TLSSocket &operator= (const TLSSocket &) = delete;
+
     private:
 
-        void CreateSSLConnection(int socket, const TLSContext &context);
+        void CreateSSL(int socket, TLSContext *context);
         
 };
+

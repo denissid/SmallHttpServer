@@ -1,12 +1,16 @@
 #pragma once 
 
+#include "Socket.h"
+
 #include <stack>
 #include <mutex>
 #include <condition_variable>
+#include <memory>
+
 
 class ThreadSafeStack
 {
-		mutable std::stack <int> m_stack;
+		mutable std::stack <std::unique_ptr<Socket> > m_stack;
 		mutable std::mutex m_mutex;
 		mutable std::condition_variable cv;
 
@@ -14,8 +18,8 @@ class ThreadSafeStack
 	
 		ThreadSafeStack() = default;
 
-		void AddSocket(int i);
-		int GetSocket() const;
+		void AddSocket(std::unique_ptr<Socket> socket);
+		std::unique_ptr<Socket>  GetSocket() const;
 
 		~ThreadSafeStack();
 

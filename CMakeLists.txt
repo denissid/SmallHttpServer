@@ -16,18 +16,16 @@ set (SOURCES_FILES_TEST mainTests.cpp)
 
 set (SOURCES_FILES  Options.cpp Server.cpp  ClientSocket.cpp
     HTTPPacket.cpp  Worker.cpp  ThreadSafeStack.cpp nlohmann/json.hpp Logger.cpp 
-    ServerSocket.cpp TLSContext.cpp TLSSocket.cpp)
+    ServerSocket.cpp TLSContext.cpp TLSSocket.cpp SocketHelper.cpp)
 
-set (CMAKE_CXX_FLAGS "-std=c++17 -pthread")
+set (CMAKE_CXX_FLAGS "-std=c++20 -pthread")
 
 find_package(OpenSSL REQUIRED)
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
 add_executable (final ${PROJECT_SOURCE_DIR}/${SOURCES_FILES} ${PROJECT_SOURCE_DIR}/${SOURCES_FILES_MAIN})
-target_link_libraries(final OpenSSL::SSL)
-target_link_libraries (final OpenSSL::Crypto)
+target_link_libraries(final OpenSSL::SSL OpenSSL::Crypto)
 
 add_executable (tests ${PROJECT_SOURCE_DIR}/${SOURCES_FILES} ${PROJECT_SOURCE_DIR}/${SOURCES_FILES_TEST} )
-target_link_libraries(tests OpenSSL::SSL)
-target_link_libraries (tests OpenSSL::Crypto)
+target_link_libraries(tests OpenSSL::SSL  OpenSSL::Crypto)
