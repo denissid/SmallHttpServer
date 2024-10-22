@@ -7,6 +7,7 @@
 #include <functional>
 #include <signal.h>
 #include <atomic>
+#include <stop_token>
 
 #include "Server.h"
 #include "ServerSocket.h"
@@ -17,12 +18,14 @@
 #include "Logger.h"
 #include "TLSSocket.h"
 
-extern std::atomic<bool> keepThreadRunning;
+std::vector<std::jthread> threads;
+std::stop_source stopSource;
 
 static void sig_handler(int )
 {
-    keepThreadRunning = false;
+    stopSource.request_stop();
 }
+
 
 void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
@@ -31,8 +34,8 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 	Log() << "Count of threads "+ to_string(i) <<endl;
 	while(i--)
 	{
-		thread thr(std::bind(Worker, std::ref(stack), folder));
-		thr.detach();
+		jthread thr(Worker, stopSource.get_token(), std::ref(stack), folder);
+        threads.push_back(move(thr));
 	}
 }
 
@@ -60,12 +63,19 @@ int main (int argc, char** argv)
 		CreateThreads (stack, options.GetDirectory(0));
 
         this_thread::sleep_for(1s);
+        auto t = stopSource.get_token();
 		do
 		{
-			auto s = server.WaitClients();
+			auto s = server.WaitClients(t);
 			stack.AddSocket(std::move(s));
 		}
-		while(keepThreadRunning);
+		while(!t.stop_requested());
+
+        for (auto &&t: threads)
+        {
+            t.join();
+        }
+
 	}
 	catch(std::exception& e)
 	{

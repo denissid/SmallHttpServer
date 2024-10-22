@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <stop_token>
 
 #include "ServerSocket.h"
 
@@ -16,7 +17,7 @@ class Server
 		Server ();
 		~Server ();
 
-		std::unique_ptr<Socket> WaitClients();
+		std::unique_ptr<Socket> WaitClients(std::stop_token st);
         void CreateEpoll();
         void AddSocket(ServerSocket &s);
 

@@ -24,8 +24,6 @@
 
 using namespace std;
 
-//TODO need refactoring 
-extern std::atomic<bool> keepThreadRunning;
 
 namespace 
 {
@@ -42,7 +40,7 @@ Server::Server (): m_epoll(-1), m_tlsContext(true)
 	}
 }
 
-std::unique_ptr<Socket> Server::WaitClients()
+std::unique_ptr<Socket> Server::WaitClients(std::stop_token st)
 {
 	do
 	{
@@ -86,7 +84,7 @@ std::unique_ptr<Socket> Server::WaitClients()
 			}
 		}
 	}
-	while(keepThreadRunning);
+	while(!st.stop_requested());
 
     return nullptr;
 }

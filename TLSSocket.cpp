@@ -73,7 +73,7 @@ bool TLSSocket::IsAlive() const
     FD_ZERO(&sockets);
     FD_SET(m_socket, &sockets);
 
-    struct timeval  tv={1, 0};
+    struct timeval  tv={5, 0};
     int r = select(m_socket+1, &sockets, NULL, NULL, &tv);
     return r>0;
 }

@@ -10,24 +10,21 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
 #include <unistd.h>
-
 #include <thread>
 #include <atomic>
-
-extern std::atomic<bool> keepThreadRunning;
+#include <stop_token>
 
 static void StartServer()
 {
-    keepThreadRunning = true;
     Server server;
    
     ServerSocket ssocket("127.0.0.1", "ip4", 
                     2000, false, false);
     server.AddSocket(ssocket);
     
-    auto clientSocket = server.WaitClients();
+    std::stop_token st;
+    auto clientSocket = server.WaitClients(st);
 
   //  Log() << "descriptor " + std::to_string(clientSocket->Get()) << std::endl;
     clientSocket->SetTimeout();

@@ -13,9 +13,9 @@
 #include <unistd.h>
 #include <thread>
 #include <atomic>
+#include <stop_token>
 
 
-extern std::atomic<bool> keepThreadRunning;
 void TestTLSCreating()
 {
     {
@@ -30,7 +30,6 @@ void TestTLSCreating()
 
 static void StartTLSServer()
 { 
-    keepThreadRunning = true;
     TLSContext context(true);
     Server server;
    
@@ -38,8 +37,8 @@ static void StartTLSServer()
                     8080, false, true);
     server.AddSocket(ssocket);
   
-    
-    auto tls = server.WaitClients();
+    std::stop_token st;
+    auto tls = server.WaitClients(st);
     //tls->Accept();
 
     std::cout << "READ";

@@ -64,24 +64,26 @@ namespace Commander
     }
 }
 
-std::atomic<bool> keepThreadRunning;
-
-void Worker (const ThreadSafeStack& stack, const std::string& directory)
+void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string& directory)
 {	
 	try
 	{
-	    keepThreadRunning = true;
 
         using namespace std;
         do
         {
-            auto socket = stack.GetSocket();
+
+         //   std::cout << "get socket" << std::endl;
+            auto socket = stack.GetSocket(st);
+
+            if (st.stop_requested())
+                return;
             if (socket==nullptr)
                 continue;
 
             socket->SetTimeout();
             bool isKA = true;
-            while (isKA && keepThreadRunning){
+            while (isKA && !st.stop_requested()){
 
                 stringstream ss;
                 ss << std::this_thread::get_id();
@@ -116,7 +118,7 @@ void Worker (const ThreadSafeStack& stack, const std::string& directory)
             Log() << "Connection: Close" << endl;
 
         }
-        while(keepThreadRunning);
+        while(!st.stop_requested());
 
 	}
 	catch (const std::exception& e)
