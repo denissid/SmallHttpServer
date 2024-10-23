@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <netdb.h>
-
+#include <span>
 #include <string>
 #include <memory>
 
@@ -34,6 +34,11 @@ class Acceptor
         }
 
         std::unique_ptr<Socket>  operator() () const;
+
+        Acceptor(const Acceptor& a) = delete;
+        Acceptor(Acceptor&& a) = delete;
+        Acceptor& operator= (const Acceptor&) = delete;
+        Acceptor& operator= (Acceptor&&) = delete;
 };
 
 template <typename T>
@@ -45,7 +50,6 @@ int Read (Buffer &buffer, T socket, int flags)
 	do
 	{
 		offset += size;
-
         if (HTTPPacket::IsBlankLine(offset, buffer))
         {
             Log() << "stop reading from socket (found blank line) " << std::endl;
@@ -72,7 +76,7 @@ int Read (Buffer &buffer, T socket, int flags)
 }
 
 template <typename T>
-int Write (const Buffer &buffer, T socket, int flags)
+int Write (std::span<const char> buffer, T socket, int flags)
 {	
     int size = 0, offset = 0;
 	do
@@ -87,7 +91,7 @@ int Write (const Buffer &buffer, T socket, int flags)
 
 	if ( size<0 )
 	{
-    LogError() << " error send " + std::to_string(errno) << std::endl;
+        LogError() << " error send " + std::to_string(errno) << std::endl;
         return size;
 	}
 

@@ -103,7 +103,7 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
                     break;
                 }
 
-                Packet packet = HTTPPacket::Parse (buffer);
+                Packet packet = HTTPPacket::Parse(buffer);
                 isKA = packet.IsKeepAlive();
                 if (packet.IsGETMethod())
                 {

@@ -1,7 +1,5 @@
 #pragma once 
-#include <string>
-
-typedef std::string Buffer;
+#include "Buffer.h"
 
 class Socket
 {

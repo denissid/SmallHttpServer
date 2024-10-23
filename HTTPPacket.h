@@ -1,12 +1,13 @@
 #pragma once
 
-#include <string>
+#include <vector>
 #include <map>
 #include <vector>
 #include <iostream>
 #include <algorithm>
 
-typedef std::string Buffer;
+#include "Buffer.h"
+
 
 	/*
      * example of packet
