@@ -7,7 +7,7 @@ std::unique_ptr<Socket>  Acceptor::operator() () const
     int clientSocket = accept (m_socket, (sockaddr*)&clientAddress, &clientLen);
     if (clientSocket<0)
     {
-        LogError() << errno << std::endl;
+        logError("accept ", errno);
         return nullptr;
     }
     char address_buffer[100]={0};
@@ -15,7 +15,7 @@ std::unique_ptr<Socket>  Acceptor::operator() () const
             0, 0, NI_NUMERICHOST);
 
     std::string s(address_buffer);
-    Log() << s << std::endl;
+    log(s);
 
     if (!m_context)
         return std::make_unique<ClientSocket> (clientSocket);

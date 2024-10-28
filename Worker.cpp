@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <format>
 
 namespace Commander
 {
@@ -45,7 +46,7 @@ namespace Commander
             return false;
         }
 
-        Log() << "Open ' "+ fullPath + "' " << endl;
+        log("Open ' ", fullPath, "' ");
         stringstream body;
         body << file.rdbuf();
 
@@ -56,7 +57,7 @@ namespace Commander
             Buffer bufferError = HTTPResponses::Create404();
             cs->WritePacket (bufferError);
 
-            LogError() << "Error of send response" << endl;
+            logError("Error of send response");
             return false;
         }
 
@@ -87,11 +88,12 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
 
                 stringstream ss;
                 ss << std::this_thread::get_id();
-                Log() << "Thread id " + ss.str() << std::endl;
+                log("Thread id ", ss.str());
+                //log("Thread id ", std::this_thread::get_id());
 
                 if (!socket->IsAlive())
                 {
-                    Log() << "Socket is not alive" << endl;
+                    logError("Socket is not alive");
                     break;
                 }
 
@@ -99,7 +101,7 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
                 int result = socket->ReadPacket(buffer);
                 if (result<=0)
                 {
-                    LogError() << "Error result of read packet "+ to_string(result) << std::endl;
+                    logError("Error result of read packet ",result);
                     break;
                 }
 
@@ -115,7 +117,7 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
                 }
             }
 
-            Log() << "Connection: Close" << endl;
+            log("Connection: Close");
 
         }
         while(!st.stop_requested());

@@ -15,7 +15,7 @@ Options::Options(int argc, char** argv)
 	using namespace std;
 	
 
-	Log() << "Options" << endl;
+	log("Options");
 	Option commandOption {ipFamily::ip4, 
                           std::string("127.0.0.1"), 
                           2000, 
@@ -45,7 +45,7 @@ Options::Options(int argc, char** argv)
 			}
 			case '?':
 			{
-				Log() << "Error";
+				logError("Error key", option);
 				break;
 			}
 		}
@@ -93,7 +93,7 @@ void Options::LoadConfig(const Option &defOption)
 	
 	if (file.is_open())
 	{
-		Log() << "Load config" << endl;
+		log("Load config");
 		json j;
 		file >> j;
 
@@ -106,13 +106,13 @@ void Options::LoadConfig(const Option &defOption)
 		    int port = s["port"];
             std::string directory = s["directory"];
 
-            Log() << " address family " + familyAddress << std::endl;
-            Log() << " address " + ipAddress << std::endl;
-	        Log() << " port " + to_string(port) << std::endl;
-	        Log() << " directory: " + directory << std::endl;
+            log(" address family ", familyAddress);
+            log(" address ", ipAddress);
+	        log(" port ",port);
+	        log(" directory: ", directory);
 
             std::string secure = s["secure"];
-            Log() << " secure " + secure << std::endl;
+            log(" secure ", secure);
 
 
             Option option{familyAddress, ipAddress, port, directory, Option::secureToBool(secure)};
@@ -121,13 +121,13 @@ void Options::LoadConfig(const Option &defOption)
     }
 	else
 	{
-		Log() << "config.json wasn't found";
+		log("config.json wasn't found");
         
         m_options.push_back(defOption);
-        Log() << " address family " + m_options.at(0).m_familyAddress << std::endl;
-        Log() << " address " + m_options.at(0).m_ipAddress << std::endl;
-	    Log() << " port " + std::to_string(m_options.at(0).m_port) << std::endl;
-	    Log() << " directory: " + m_options.at(0).m_directory << std::endl;
+        log(" address family ", m_options.at(0).m_familyAddress);
+        log(" address ", m_options.at(0).m_ipAddress);
+	    log(" port ", m_options.at(0).m_port);
+	    log(" directory: ", m_options.at(0).m_directory);
 	}
  }
 

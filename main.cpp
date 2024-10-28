@@ -31,7 +31,7 @@ void CreateThreads (const ThreadSafeStack& stack, const std::string& folder)
 {
 	using namespace std;
 	int i = 20;//thread::hardware_concurrency();
-	Log() << "Count of threads "+ to_string(i) <<endl;
+	log("Count of threads ", i);
 	while(i--)
 	{
 		jthread thr(Worker, stopSource.get_token(), std::ref(stack), folder);
@@ -79,11 +79,11 @@ int main (int argc, char** argv)
 	}
 	catch(std::exception& e)
 	{
-		LogError() << "Exception "<< e.what() << endl;
+		logError("Exception ", e.what());
 	}
 	catch (...)
 	{
-		LogError() << "Unknown exception" << endl;
+		logError("Unknown exception");
 	}
 
 	return 0;

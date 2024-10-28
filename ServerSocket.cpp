@@ -45,7 +45,7 @@ namespace
 		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
 			flags = 0;
         flags &= ~O_NONBLOCK;
-        Log() << "flags " << flags << endl;
+        log( "flags ", flags);
 		return fcntl (fd, F_SETFL, flags);
 	#else
 		return ioctl(fd, FIOBIO, &flags);
@@ -59,7 +59,7 @@ namespace
 		int result = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 		if (reuse<0)
 		{
-			LogError() << "set socket option " << errno;
+			logError("set socket option ", errno);
 		}
 	}
 }
@@ -67,11 +67,11 @@ namespace
 
 ServerSocket::ServerSocket(const std::string& address, const std::string &family, int port, bool isBlock, bool isSecure): m_isSecure(isSecure)
 {
-    Log() << "Configure local address " << std::endl;
-	Log() << "Create master socket " + address +  ":" + to_string(port) << std::endl;
+    log("Configure local address ");
+	log("Create master socket ", address, ":", port);
 
 	m_socket = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    Log() << "master socket " + to_string(m_socket) << std::endl;
+    log("master socket ",m_socket);
 	sockaddr_in sockAddr = {0};
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(port);
@@ -84,7 +84,7 @@ ServerSocket::ServerSocket(const std::string& address, const std::string &family
 
 	SetReuseSocket(m_socket);
 
-	Log() << "Bind master socket" << std::endl;
+	log("Bind master socket");
 	int errb = bind (m_socket, (sockaddr*) (&sockAddr), sizeof(sockAddr));
 	if (errb==-1)
 	{
@@ -95,13 +95,13 @@ ServerSocket::ServerSocket(const std::string& address, const std::string &family
     if (!isBlock)
 	    SetNonblock(m_socket);
 
-	Log() << "Make master socket listened" << endl;
+	log("Make master socket listened");
 	listen (m_socket, SOMAXCONN);
 }
 
 std::unique_ptr<Socket> ServerSocket::Accept(const Acceptor& acceptor)
 {	
-    Log() << "Accept socket " << endl;
+    log("Accept socket ");
 
     return acceptor();
 }

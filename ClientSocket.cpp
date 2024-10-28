@@ -23,7 +23,7 @@ using namespace std;
 
 ClientSocket::ClientSocket (int socket):m_socket(socket)
 {
-		Log() << "SOCKET " + to_string(m_socket) << std::endl;
+		log("SOCKET ", m_socket);
 }
 
 void ClientSocket::SetTimeout ()
@@ -48,7 +48,7 @@ bool ClientSocket::Connect(const std::string& ip, int port)
     int r = connect (m_socket, (sockaddr*)&addr, addrlen);
     if (r<0)
     {
-        LogError() << " error connection " + to_string(r) << std::endl;
+        logError(" error connection ", r);
         return false;
     }
     return true;

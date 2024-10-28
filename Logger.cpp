@@ -42,21 +42,19 @@ Logger::Logger(): m_file("log.txt", fstream::in | fstream::out | fstream::app)
     }
 }
 
-Logger& Log()
+Logger& LogPrv()
 {
 	TimePrefix timePrefix;
 	logger() << timePrefix.GetString() << " ";
 	return logger;
 }
 
-Logger &LogError()
+Logger &LogErrorPrv()
 {
 	TimePrefix timePrefix;
     logger() << timePrefix.GetString() << " Error ";
     return logger;
 }
-
-#define OUTPUT_TO_SCREEN 1
 
 void WriteLog(const string& message, bool isTimePrefix)
 {

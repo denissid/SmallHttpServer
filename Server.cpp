@@ -32,7 +32,7 @@ namespace
 
 Server::Server (): m_epoll(-1), m_tlsContext(true)
 {
-	Log() << "Create epoll descriptor" <<endl;
+	log("Create epoll descriptor");
 	m_epoll = epoll_create1(0);
 	if (m_epoll==-1)
 	{
@@ -53,12 +53,12 @@ std::unique_ptr<Socket> Server::WaitClients(std::stop_token st)
 			throw NetException("Error epoll_wait create");
 		}
 
-        Log() << "Count events " + to_string(countEvents) << std::endl;
+        log("Count events ", countEvents);
 
 		for ( size_t i = 0; i < countEvents; ++i)
 		{
             int masterSocket = Events[i].data.fd;
-            Log() << "master socket " + to_string(masterSocket) << std::endl;
+            log("master socket ", masterSocket);
             auto s = std::find_if( begin(m_serverSockets),
                                    end(m_serverSockets),
                                    [masterSocket] (const ServerSocket &s)
@@ -70,13 +70,13 @@ std::unique_ptr<Socket> Server::WaitClients(std::stop_token st)
 			{
                 if (s->IsSecure())
                 {
-                    Log() << "Connect to secure socket 8080 " << std::endl;
+                    log("Connect to secure socket 8080 ");
                     Acceptor acceptor(s->Get(), &m_tlsContext);
                     return s->Accept(acceptor);
                 }
                 else
                 {
-                    Log() << "Connect to  socket  2000 " << std::endl;
+                    log("Connect to  socket  2000 ");
                     Acceptor acceptor(s->Get());
                     return s->Accept(acceptor);
                 }
@@ -98,7 +98,7 @@ void Server::DeleteSocket (int socket)
 
 	if (err==-1)
 	{
-		LogError() << "epoll_ctl del " + to_string(errno) ;
+		logError("epoll_ctl del", errno) ;
 	}
 
 }
@@ -117,7 +117,7 @@ void Server::AddSocket (int socket)
 	int err = epoll_ctl(m_epoll, EPOLL_CTL_ADD, socket, &event);
     if (err==-1)
 	{
-		LogError() << "epoll_ctl add socket" + to_string(errno) << std::endl;
+		logError("epoll_ctl add socket", errno);
 		throw NetException("add socket in epoll");
 	}
 }

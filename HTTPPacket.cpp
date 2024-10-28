@@ -219,7 +219,7 @@ const  std::string GetContentType(const std::string &fileName)
     auto pos = fileName.rfind('.');
     if (pos==std::string::npos)
     {
-        LogError() << "Error file name" + fileName << std::endl;
+        logError("Error file name", fileName);
         return "";
     }
     auto ext = fileName.substr(pos, std::string::npos);

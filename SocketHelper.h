@@ -52,7 +52,7 @@ int Read (Buffer &buffer, T socket, int flags)
 		offset += size;
         if (HTTPPacket::IsBlankLine(offset, buffer))
         {
-            Log() << "stop reading from socket (found blank line) " << std::endl;
+            log("stop reading from socket (reason blank line) ");
             break;
         }
 
@@ -66,11 +66,11 @@ int Read (Buffer &buffer, T socket, int flags)
     if ( size<=0 )
     {
         if (size<0)
-            LogError() << " errno recv '" + std::to_string(errno) + "' size " + std::to_string(size) << std::endl;
+            logError(" errno recv '", errno, "' size (", size, ")");
         return size;
     }
 
-	Log() << "Size packet '" + std::to_string(offset) + "' " << std::endl;
+	log("Size packet '", offset, "' ");
 	buffer.resize (offset);
     return offset;
 }
@@ -91,7 +91,7 @@ int Write (std::span<const char> buffer, T socket, int flags)
 
 	if ( size<0 )
 	{
-        LogError() << " error send " + std::to_string(errno) << std::endl;
+        logError(" error send ", errno);
         return size;
 	}
 
