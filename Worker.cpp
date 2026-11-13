@@ -50,7 +50,7 @@ namespace Commander
         stringstream body;
         body << file.rdbuf();
 
-        Buffer message = HTTPResponses::Create200(body.str(), contentType, true);
+        Buffer message = HTTPResponses::Create200(body.str(), contentType, false);
         int result = cs->WritePacket (message);
         if (result<=0)
         { 

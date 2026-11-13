@@ -160,13 +160,13 @@ namespace HTTPResponses
 Buffer Create200(const string& dataFile, const string &contentType, bool isKeepAlive)
 {
 	Buffer buffer ("HTTP/1.0 200 OK\r\n");
-
-	buffer += "Content-length: " + to_string(dataFile.size()) + "\r\n"
+    static const string end = "\r\n\r\n";
+	buffer += "Content-length: " + to_string(end.size()) + "\r\n"
 	+ "Connection: "+getKeepAliveString(isKeepAlive)+"\r\n"
 	+ "Content-Type: "+contentType +"\r\n"
 	+ "\r\n"
 	+ dataFile
-    + "\r\n\r\n";
+    + end;
  
 
 	return buffer;
