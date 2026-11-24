@@ -98,14 +98,14 @@ bool TLSSocket::Accept()
     return true;
 }
 
-int TLSSocket::ReadPacket (Buffer& buffer) const
+std::tuple<int, ssize_t> TLSSocket::ReadPacket (Buffer& buffer, size_t size) const
 {
-    return Read (buffer, m_ssl, 0);
+    return Read (buffer, size, m_ssl, 0);
 }
 
-int TLSSocket::WritePacket(const Buffer& buffer) const
+ std::tuple<int, ssize_t> TLSSocket::WritePacket(const Buffer& buffer, size_t size) const
 {
-    return Write(buffer, m_ssl, 0);
+    return Write(buffer, size, m_ssl, 0);
 }
 
 void TLSSocket::shutdown()

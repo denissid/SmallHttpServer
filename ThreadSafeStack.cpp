@@ -1,12 +1,13 @@
 #include "ThreadSafeStack.h"
 #include "Exceptions.h"
+#include "Logger.h"
 
 #include <chrono>
 
 using namespace std;
 using namespace std::chrono_literals;
 
-void ThreadSafeStack::AddSocket(std::unique_ptr<Socket> i)
+void ThreadSafeStack::AddContext(std::unique_ptr<IOContext> i)
 {
     {
 	    unique_lock lock (m_mutex);
@@ -15,18 +16,20 @@ void ThreadSafeStack::AddSocket(std::unique_ptr<Socket> i)
 	cv.notify_one();
 }
 
- std::unique_ptr<Socket> ThreadSafeStack::GetSocket(std::stop_token st) const
+ std::unique_ptr<IOContext> ThreadSafeStack::GetContext(std::stop_token st) const
 {
 	std::unique_lock lock(m_mutex);
 	cv.wait_for(lock, st, 5s, [this]{return !m_stack.empty();});
 
     if (st.stop_requested())
     {
+        logError("Program was interupted");
         return nullptr;
     }
 
     if (m_stack.empty())
     {
+        //logError("Stack empty");
         return nullptr;
     }
 

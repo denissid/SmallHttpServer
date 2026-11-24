@@ -24,35 +24,6 @@
 using namespace std;
 namespace 
 {
-
-	int SetNonblock(int fd)
-	{
-		int flags = 0;
-	#if defined(O_NONBLOCK)
-		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
-			flags = 0;
-		return fcntl (fd, F_SETFL, flags| O_NONBLOCK);
-	#else
-		flags = 1;
-		return ioctl(fd, FIOBIO, &flags);
-	#endif
-	}
-
-	int SetBlock(int fd)
-	{
-		int flags = 0;
-	#if defined(O_NONBLOCK)
-		if (-1==(flags = fcntl(fd, F_GETFL, 0)))
-			flags = 0;
-        flags &= ~O_NONBLOCK;
-        log( "flags ", flags);
-		return fcntl (fd, F_SETFL, flags);
-	#else
-		return ioctl(fd, FIOBIO, &flags);
-	#endif
-	}
-
-
 	void SetReuseSocket(int fd)
 	{
 		int reuse = 1;

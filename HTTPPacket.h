@@ -31,6 +31,13 @@ struct Packet
 {
 	std::map <std::string, std::string> params;
 
+    enum class Connection
+    {
+        KeepAlive = 0,
+        Close,
+        Empty
+    };
+
 	void AddParam (const std::string& name, 
 			const std::string& value)
 	{
@@ -47,14 +54,20 @@ struct Packet
 		return std::string("GET")==params.at("command"); 
 	}
 
-    bool IsKeepAlive() const 
+    Connection IsKeepAlive() const 
     {
         std::string val = params.at("Connection");
         std::transform(begin(val), end(val), begin(val), [](char c)
                 {
                     return tolower(c);
                 });
-        return std::string("keep-alive")==val;
+        if (val=="keep-alive")
+            return Connection::KeepAlive;
+        else
+            if(val=="Close")
+            return Connection::Close;
+        else
+            return Connection::Empty;
     }
 };
 

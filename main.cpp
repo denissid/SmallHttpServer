@@ -7,6 +7,7 @@
 #include <functional>
 #include <signal.h>
 #include <atomic>
+#include <memory>
 #include <stop_token>
 
 #include "Server.h"
@@ -54,9 +55,9 @@ int main (int argc, char** argv)
 		Server server;
         for (int i=0; i<size; ++i)
         {
-            ServerSocket ssocket(options.GetIP(i), options.GetIPFamily(i), 
-                    options.GetPort(i), false, options.IsSecure(i));
-            server.AddSocket(ssocket);
+            auto ssocket = std::make_unique<ServerSocket>  ( options.GetIP(i), options.GetIPFamily(i), 
+                    options.GetPort(i), false, options.IsSecure(i)  );
+            server.AddSocket(std::move(ssocket) );
         }
 
 		ThreadSafeStack stack;
@@ -67,7 +68,12 @@ int main (int argc, char** argv)
 		do
 		{
 			auto s = server.WaitClients(t);
-			stack.AddSocket(std::move(s));
+            if (s==nullptr)
+            {
+                logError("Error wait client");
+            }
+            log("Add context to stack");
+			stack.AddContext(std::move(s));
 		}
 		while(!t.stop_requested());
 

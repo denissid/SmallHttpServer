@@ -65,14 +65,14 @@ bool ClientSocket::IsAlive() const
     return r>0;
 }
 
-int ClientSocket::ReadPacket(Buffer& buffer) const
+std::tuple<int, ssize_t> ClientSocket::ReadPacket(Buffer& buffer, size_t size) const
 {
-    return Read (buffer, m_socket, MSG_NOSIGNAL);
+    return Read (buffer, size, m_socket, MSG_NOSIGNAL);
 }
 
-int ClientSocket::WritePacket (const Buffer& buffer) const 
+std::tuple<int, ssize_t> ClientSocket::WritePacket (const Buffer& buffer, size_t size) const 
 {
-    return Write(buffer, m_socket, MSG_NOSIGNAL);
+    return Write(buffer, size, m_socket, MSG_NOSIGNAL);
 }
 
 void ClientSocket::CloseSocket()
@@ -88,6 +88,6 @@ void ClientSocket::CloseSocket()
 
 ClientSocket::~ClientSocket ()
 {
-	CloseSocket();
+        CloseSocket();
 }
 

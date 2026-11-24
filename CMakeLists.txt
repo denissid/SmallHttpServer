@@ -18,7 +18,7 @@ set (SOURCES_FILES  Options.cpp Server.cpp  ClientSocket.cpp
     HTTPPacket.cpp  Worker.cpp  ThreadSafeStack.cpp nlohmann/json.hpp Logger.cpp 
     ServerSocket.cpp TLSContext.cpp TLSSocket.cpp SocketHelper.cpp)
 
-set (CMAKE_CXX_FLAGS "-std=c++20 -pthread")
+set (CMAKE_CXX_FLAGS "-std=c++26 -pthread")
 
 find_package(OpenSSL REQUIRED)
 

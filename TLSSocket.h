@@ -18,7 +18,7 @@ class TLSSocket: public Socket
         SSL *m_ssl = nullptr;
         int m_socket = -1;
         TLSContext *m_context=nullptr;
-
+        
     public:
 
         TLSSocket(int socket, TLSContext *context);
@@ -28,8 +28,14 @@ class TLSSocket: public Socket
         bool Accept();
         void SetTimeout ();
         bool IsAlive() const;
-        int ReadPacket (Buffer& buffer) const;
-        int WritePacket(const Buffer& buffer) const;
+
+        std::tuple<int, ssize_t> ReadPacket (Buffer& buffer, size_t size) const;
+        std::tuple<int, ssize_t> WritePacket(const Buffer& buffer, size_t size) const;
+
+        int Get() const
+        {
+            return m_socket;
+        }
 
         void shutdown();
 

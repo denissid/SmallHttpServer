@@ -1,6 +1,7 @@
 #pragma once 
 #include <vector>
 #include <string>
+#include <tuple>
 
 #include "Socket.h"
 
@@ -14,8 +15,8 @@ class ClientSocket: public Socket
 
         bool Connect(const std::string& ip, int port);
         void SetTimeout ();
-		int ReadPacket(Buffer& packet) const;
-		int WritePacket (const Buffer& packet) const;
+		std::tuple<int, ssize_t> ReadPacket(Buffer& packet, size_t size) const;
+		std::tuple<int, ssize_t> WritePacket (const Buffer& packet, size_t size) const;
         bool IsAlive() const;
         int Get() const
         {
@@ -23,6 +24,19 @@ class ClientSocket: public Socket
         }
 
 		~ClientSocket ();
+
+        ClientSocket(ClientSocket &&s)
+        {
+            m_socket = s.m_socket;
+            s.m_socket = -1;
+        }
+
+        ClientSocket& operator= (ClientSocket &&s)
+        {
+            m_socket = s.m_socket;
+            s.m_socket = -1;
+            return *this;
+        }
 
         ClientSocket(const ClientSocket&) = delete;
         ClientSocket& operator= (const ClientSocket&) = delete;

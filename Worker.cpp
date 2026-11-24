@@ -11,10 +11,80 @@
 #include <fstream>
 #include <sstream>
 #include <format>
+#include <cassert>
 
 namespace Commander
 {
-    bool ProcessGET (auto &cs, const Packet &packet, const std::string &directory)
+    Buffer CreateRespond(const Packet &packet, const std::string &directory)
+    { 
+        using namespace std;
+
+        Buffer message; 
+        string path = packet.GetPath();
+
+        //check path 
+        if (path.size()>100)
+        {
+            message = HTTPResponses::Create400();
+            return message;
+        }
+        if (path=="..")
+        {
+            message = HTTPResponses::Create404();
+            return message;
+        }
+
+        string fullPath = directory + path;
+
+        auto contentType = FileHelper::GetContentType(fullPath);
+
+        fstream file (fullPath.c_str(), std::fstream::in);
+        if (!file)
+        {
+            message = HTTPResponses::Create404();
+            return message;
+        }
+
+        log("Open ' ", fullPath, "' ");
+        stringstream body;
+        body << file.rdbuf();
+
+        Packet::Connection connection = packet.IsKeepAlive();
+        if (connection==Packet::Connection::KeepAlive)
+        {
+            logError("Packet contains keep-alive");
+        }
+        else
+        if (connection==Packet::Connection::Close)
+        {
+            logError("Packet contains close connection");
+        }
+        else
+        {
+            logError("Packet contains connection empty");
+        }
+
+        message = HTTPResponses::Create200(body.str(), contentType, true);
+        logError(message);
+
+        return message;
+
+        /*int result = socket->WritePacket (message);
+        if (result<=0)
+        { 
+            Buffer bufferError = HTTPResponses::Create404();
+            socket->WritePacket (bufferError);
+
+            logError("Error of send response");
+            return false;
+        }
+
+        return true;
+        */
+
+    }
+
+    bool ProcessGET (auto &socket, const Packet &packet, const std::string &directory)
     { 
         using namespace std;
 
@@ -23,13 +93,13 @@ namespace Commander
         if (path.size()>100)
         {
             Buffer message = HTTPResponses::Create400();
-            cs->WritePacket (message);
+            socket->WritePacket (message);
             return false;
         }
         if (path=="..")
         {
             Buffer message = HTTPResponses::Create404();
-            cs->WritePacket (message);
+            socket->WritePacket (message);
 
             return false;
         }
@@ -42,7 +112,7 @@ namespace Commander
         if (!file)
         {
             Buffer message = HTTPResponses::Create404();
-            cs->WritePacket (message);
+            socket->WritePacket (message);
             return false;
         }
 
@@ -50,12 +120,28 @@ namespace Commander
         stringstream body;
         body << file.rdbuf();
 
-        Buffer message = HTTPResponses::Create200(body.str(), contentType, false);
-        int result = cs->WritePacket (message);
+        Packet::Connection connection = packet.IsKeepAlive();
+        if (connection==Packet::Connection::KeepAlive)
+        {
+            logError("Packet contains keep-alive");
+        }
+        else
+        if (connection==Packet::Connection::Close)
+        {
+            logError("Packet contains close connection");
+        }
+        else
+        {
+            logError("Packet contains connection empty");
+        }
+
+        Buffer message = HTTPResponses::Create200(body.str(), contentType, true);
+        logError(message);
+        int result = socket->WritePacket (message);
         if (result<=0)
         { 
             Buffer bufferError = HTTPResponses::Create404();
-            cs->WritePacket (bufferError);
+            socket->WritePacket (bufferError);
 
             logError("Error of send response");
             return false;
@@ -73,12 +159,15 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
         using namespace std;
         do
         {
-
-         //   std::cout << "get socket" << std::endl;
-            auto socket = stack.GetSocket(st);
-
+            //std::cout << "get context" << std::endl;
+            auto context = stack.GetContext(st);
             if (st.stop_requested())
                 return;
+
+            if (context==nullptr)
+                continue; 
+
+            auto socket = context->GetSocket();
             if (socket==nullptr)
                 continue;
 
@@ -89,7 +178,6 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
                 stringstream ss;
                 ss << std::this_thread::get_id();
                 log("Thread id ", ss.str());
-                //log("Thread id ", std::this_thread::get_id());
 
                 if (!socket->IsAlive())
                 {
@@ -97,23 +185,37 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
                     break;
                 }
 
+
                 Buffer buffer;
-                int result = socket->ReadPacket(buffer);
+                auto [size, result] = socket->ReadPacket(buffer, MaxBufferSize);
                 if (result<=0)
                 {
+                    if (result<0 && errno==EAGAIN)
+                    {
+                        logError("We get EAGAIN on READ ");
+                    }
+                    
                     logError("Error result of read packet ",result);
                     break;
                 }
 
                 Packet packet = HTTPPacket::Parse(buffer);
-                isKA = packet.IsKeepAlive();
+                isKA = packet.IsKeepAlive()==Packet::Connection::Close ? false : true;
                 if (packet.IsGETMethod())
                 {
-                    bool isProcessed= Commander::ProcessGET (socket, packet, directory);
-                    if (!isProcessed)
+                    auto respond = Commander::CreateRespond (packet, directory);
+                    auto [size, result]  = socket->WritePacket(respond, respond.size());
+                    if (result<=0)
                     {
-                       break; 
+                        if (result<0 && errno==EAGAIN)
+                        {
+                            logError("We get EAGAIN on WRITE ");
+                        }   
+                    
+                        logError("Error result of write packet ",result);
+                        break;
                     }
+
                 }
             }
 

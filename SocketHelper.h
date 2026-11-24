@@ -21,7 +21,7 @@ class Acceptor
 {
 
         int m_socket = -1;
-        TLSContext *m_context = nullptr;
+        TLSContext *m_tlsContext = nullptr;
 
     public:
 
@@ -29,11 +29,12 @@ class Acceptor
         {
         }
 
-        Acceptor (int masterSocket, TLSContext *context): m_socket(masterSocket), m_context(context)
+        Acceptor (int masterSocket, TLSContext *context): m_socket(masterSocket), m_tlsContext(context)
         {
         }
 
         std::unique_ptr<Socket>  operator() () const;
+        int AcceptSocket() const;
 
         Acceptor(const Acceptor& a) = delete;
         Acceptor(Acceptor&& a) = delete;
@@ -42,14 +43,14 @@ class Acceptor
 };
 
 template <typename T>
-int Read (Buffer &buffer, T socket, int flags)
-{	
-    buffer.resize(65535);
-	
-	int size = 0, offset = 0;
+std::tuple<int, ssize_t> Read (Buffer &buffer, size_t s, T socket, int flags)
+{
+    buffer.resize(s); //TODO fix it
+
+	int res = 0, offset = 0;
 	do
 	{
-		offset += size;
+		offset += res;
         if (HTTPPacket::IsBlankLine(offset, buffer))
         {
             log("stop reading from socket (reason blank line) ");
@@ -57,45 +58,48 @@ int Read (Buffer &buffer, T socket, int flags)
         }
 
         if constexpr( std::is_integral<T>::value )
-            size = recv(socket, (void*)&buffer[offset], buffer.size()-offset, flags);
+            res = recv(socket, (void*)&buffer[offset], buffer.size()-offset, flags);
         else
-            size = SSL_read((SSL*)socket, (void*)&buffer[offset], buffer.size()-offset);
+            res = SSL_read((SSL*)socket, (void*)&buffer[offset], buffer.size()-offset);
     }
-	while ( size>0 );
+	while (res>0 && offset<buffer.size());
 
-    if ( size<=0 )
+    if (res<0)
     {
-        if (size<0)
-            logError(" errno recv '", errno, "' size (", size, ")");
-        return size;
+        logError(" errno recv '", errno, "' res (", res, ")");
+
+        return std::make_tuple(offset,res);
     }
 
-	log("Size packet '", offset, "' ");
 	buffer.resize (offset);
-    return offset;
+    return std::make_tuple(offset, res);
 }
 
 template <typename T>
-int Write (std::span<const char> buffer, T socket, int flags)
+std::tuple<int, ssize_t>  Write (std::span<const char> buffer, size_t bsize, T socket, int flags)
 {	
-    int size = 0, offset = 0;
+    int res = 0, offset = 0;
 	do
 	{
-		offset += size;
-        if constexpr( std::is_integral<T>::value )
-		    size = send (socket, &buffer[offset], buffer.size()-offset, MSG_NOSIGNAL);
-        else
-            size = SSL_write(socket, &buffer[offset], buffer.size()-offset);
-	}
-	while ( offset<buffer.size() && size>0);
+		offset += res;
 
-	if ( size<0 )
+        if constexpr( std::is_integral<T>::value )
+		    res = send (socket, &buffer[offset], bsize-offset, MSG_NOSIGNAL);
+        else
+            res = SSL_write(socket, &buffer[offset], buffer.size()-offset);
+	}
+	while ( offset<buffer.size() && res>0);
+
+	if (res<0)
 	{
         logError(" error send ", errno);
-        return size;
+        return std::make_tuple(offset, res);
 	}
 
-    return offset;
+    return std::make_tuple(offset, res);
 }
+
+int SetNonblock(int fd);
+int SetBlock(int fd);
 
 

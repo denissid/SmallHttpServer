@@ -40,7 +40,7 @@ Server::Server (): m_epoll(-1), m_tlsContext(true)
 	}
 }
 
-std::unique_ptr<Socket> Server::WaitClients(std::stop_token st)
+std::unique_ptr<IOContext> Server::WaitClients(std::stop_token st)
 {
 	do
 	{
@@ -57,35 +57,56 @@ std::unique_ptr<Socket> Server::WaitClients(std::stop_token st)
 
 		for ( size_t i = 0; i < countEvents; ++i)
 		{
-            int masterSocket = Events[i].data.fd;
-            log("master socket ", masterSocket);
-            auto s = std::find_if( begin(m_serverSockets),
-                                   end(m_serverSockets),
-                                   [masterSocket] (const ServerSocket &s)
-                                   {
-                                        return s.Get()==masterSocket;
-                                   });
-                          
-			if (s!=end(m_serverSockets))
+            int socket = Events[i].data.fd;
+            log("master socket ", socket);
+            auto it =  m_serverSockets.find(socket);
+
+			if (it!=end(m_serverSockets))
 			{
-                if (s->IsSecure())
+                    auto &s = it->second;
+                    if (s->IsSecure())
+                    {
+                        log("Connect to secure socket 8080 ");
+                        Acceptor acceptor(s->Get(), &m_tlsContext);
+                        auto soc =  s->Accept(acceptor);
+                        return std::make_unique<IOContext>(IOContext::Type::Read, std::move(soc));
+                    }
+                    else
+                    {
+                        log("Connect to  socket  2000 ");
+                        Acceptor acceptor(s->Get());
+                        int clientSocket  = acceptor.AcceptSocket();
+                        if (clientSocket<0)
+                        {
+                            logError("client socket return error");
+                        }
+                        SetNonblock(clientSocket);
+                        AddClientSocket(clientSocket, SocketType::Read, false);
+                        //return acceptor(); //s->Accept(acceptor);
+                    }
+            }
+            else
+            {
+                auto s = m_contexts.find(socket); 
+                if (s==end(m_contexts))
                 {
-                    log("Connect to secure socket 8080 ");
-                    Acceptor acceptor(s->Get(), &m_tlsContext);
-                    return s->Accept(acceptor);
+                    log("Create client socket and context ");
+                    auto soc = std::make_unique<ClientSocket>(socket);
+                    return std::make_unique<IOContext> (IOContext::Type::Read, std::move(soc));
                 }
                 else
                 {
-                    log("Connect to  socket  2000 ");
-                    Acceptor acceptor(s->Get());
-                    return s->Accept(acceptor);
+                    log("use already created client socket ");
+                    auto client = move(s->second);
+                    m_contexts.erase(s);
+                    return move(client);
                 }
-                
-			}
-		}
+		    }
+        }
 	}
 	while(!st.stop_requested());
 
+    logError("Wait clients returned 0");
     return nullptr;
 }
 
@@ -103,10 +124,10 @@ void Server::DeleteSocket (int socket)
 
 }
 
-void Server::AddSocket(ServerSocket &s)
+void Server::AddSocket(std::unique_ptr<ServerSocket> s)
 {
-    AddSocket(s.Get());
-    m_serverSockets.push_back(std::move(s));
+    AddSocket(s->Get());
+    m_serverSockets.insert({s->Get(), std::move(s)});
 }
 
 void Server::AddSocket (int socket)
@@ -122,12 +143,42 @@ void Server::AddSocket (int socket)
 	}
 }
 
+void Server::AddSocket(SocketType st, bool isUpdate, std::unique_ptr<IOContext> context)
+{
+    int lsoc = context->GetSocket()->Get();
+    AddClientSocket(lsoc, st, isUpdate);
+    //m_sockets.insert({socket->Get(), std::move(socket)});
+    m_contexts.insert({lsoc, std::move(context)});
+}
+
+void Server::AddClientSocket(int socket, SocketType st, bool isUpdate)
+{ 
+    if (st==SocketType::None)
+        throw NetException ("Unknown socket type");
+
+    epoll_event event = {0};
+	event.data.fd = socket;
+
+    int flag = EPOLLIN; 
+    if (st==SocketType::Write)
+       flag |= EPOLLOUT;
+
+	event.events = flag | EPOLLET| EPOLLONESHOT;
+	int err = epoll_ctl(m_epoll, isUpdate ? EPOLL_CTL_MOD : EPOLL_CTL_ADD, socket, &event);
+    if (err==-1)
+	{
+		logError("epoll_ctl add non blocksocket", errno);
+		throw NetException("add socket in epoll");
+	}
+
+}
+
 Server::~Server ()
 {	
     for_each(begin(m_serverSockets), end(m_serverSockets), 
-            [this] (const ServerSocket &s)
+            [this] (auto &s)
             {
-                DeleteSocket(s.Get());
+                DeleteSocket(s.second->Get());
             }
         );
 

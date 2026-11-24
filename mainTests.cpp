@@ -3,6 +3,7 @@
 #include "Tests/Tests.h"
 #include "Tests/TLSTests.h"
 #include "Tests/SndRcvTest.h"
+#include "Tests/SndRcvUnbTest.h"
 
 int main (int argc, char** argv)
 {
@@ -18,5 +19,7 @@ int main (int argc, char** argv)
     TestTLSCreating();
     TestTLSSndRcv();
 
+    TestEAGAINWrite();
+    TestEAGAINRead();
 	return 0;
 }

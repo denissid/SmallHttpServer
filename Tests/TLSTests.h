@@ -33,31 +33,32 @@ static void StartTLSServer()
     TLSContext context(true);
     Server server;
    
-    ServerSocket ssocket("127.0.0.1", "ip4", 
+    auto ssocket = std::make_unique <ServerSocket> ("127.0.0.1", "ip4", 
                     8080, false, true);
-    server.AddSocket(ssocket);
+    server.AddSocket(std::move(ssocket));
   
     std::stop_token st;
-    auto tls = server.WaitClients(st);
+    auto ctx = server.WaitClients(st);
+    auto tls = ctx->GetSocket();
     //tls->Accept();
 
     std::cout << "READ";
     Buffer packet;
-    int result = tls->ReadPacket(packet);
-    if (result<=0)
+    auto [size, result] = tls->ReadPacket(packet, MaxBufferSize);
+    if (result<0)
     {
         perror ("Readpacket ");
         std::cout << "error packet read " << result << std::endl;
-        return;
+    //    return;
      }
 
 
-    int result1 = tls->WritePacket(packet);
-    if (result1<=0)
+    auto [_, result1] = tls->WritePacket(packet, packet.size() );
+    if (result1<0)
     {
         perror ("Writepacket ");
         std::cout << "error packet write " << result1 << std::endl;
-        return;
+      //  return;
     }
 
 }
@@ -83,26 +84,26 @@ void TestTLSSndRcv()
     if (!tls.Connect( "127.0.0.1"))
     {
         std::cout << "Error tls connection" << std::endl;
-        return;
+      //  return;
     }
 
     Buffer packetGet = HTTPRequest::CreateGET("127.0.0.1", "8080");
-    int result1 = tls.WritePacket(packetGet);
+    auto [size,result1] = tls.WritePacket(packetGet, packetGet.size());
     if (result1<=0)
     {
         perror ("Writepacket ");
         std::cout << "error packet write " << result1 << std::endl;
-        return;
+      //  return;
     }
 
 
     Buffer packet;
-    int result = tls.ReadPacket(packet);
+    auto [_, result] = tls.ReadPacket(packet, MaxBufferSize);
     if (result<=0)
     {
         perror ("Readpacket ");
         std::cout << "error packet read " << result << std::endl;
-        return;
+        //return;
      }
 
     thr.join();
