@@ -12,6 +12,7 @@
 #include <fcntl.h>
 
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
@@ -38,6 +39,12 @@ Server::Server (): m_epoll(-1), m_tlsContext(true)
 	{
 		throw NetException("Error epoll create");
 	}
+
+    m_wake_fd = eventfd(0, O_NONBLOCK|FD_CLOEXEC);
+    epoll_event ev{};
+    ev.events = EPOLLIN;
+    ev.data.fd = m_wake_fd;
+    epoll_ctl(m_epoll, EPOLL_CTL_ADD, m_wake_fd, &ev);
 }
 
 std::unique_ptr<IOContext> Server::WaitClients(std::stop_token st)
@@ -58,6 +65,14 @@ std::unique_ptr<IOContext> Server::WaitClients(std::stop_token st)
 		for ( size_t i = 0; i < countEvents; ++i)
 		{
             int socket = Events[i].data.fd;
+            if (socket==m_wake_fd)
+            {
+                uint64_t val;
+                read(m_wake_fd, &val, sizeof(val));
+                log("epoll_wait interrupted via eventfd!");
+                return nullptr;
+            }
+
             log("master socket ", socket);
             auto it =  m_serverSockets.find(socket);
 

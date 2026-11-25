@@ -11,21 +11,24 @@
 
 class Server 
 {
-
 	    int m_epoll = -1;
- //       std::unordered_map<int, std::unique_ptr<Socket> > m_sockets;
+        int m_wake_fd  = -1;
         std::unordered_map<int, std::unique_ptr<IOContext> > m_contexts;
         std::unordered_map<int, std::unique_ptr<ServerSocket> > m_serverSockets;
         TLSContext m_tlsContext;
 
 	public:
-        
            
 		Server ();
 		~Server ();
 
 		std::unique_ptr<IOContext> WaitClients(std::stop_token st);
         void CreateEpoll();
+
+        int GetStopFd()
+        {
+            return m_wake_fd;
+        }
 
         void AddSocket(std::unique_ptr<ServerSocket> s);
         void AddSocket(SocketType st, bool isUpdate, std::unique_ptr<IOContext> c);

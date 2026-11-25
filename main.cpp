@@ -22,9 +22,10 @@
 std::vector<std::jthread> threads;
 std::stop_source stopSource;
 
+std::atomic_flag gStop(false);
 static void sig_handler(int )
 {
-    stopSource.request_stop();
+    gStop.test_and_set();
 }
 
 
@@ -63,22 +64,31 @@ int main (int argc, char** argv)
 		ThreadSafeStack stack;
 		CreateThreads (stack, options.GetDirectory(0));
 
+        auto token = stopSource.get_token();
+        int stopFd = server.GetStopFd();
+        jthread controlThread([stopFd] () { 
+                    while(!gStop.test())
+                    {
+                    }
+                    log("stopped was sent");
+                    stopSource.request_stop();
+                    uint64_t val = 1;
+                    write(stopFd, &val, sizeof(val)); 
+                } );
+
+        controlThread.detach();
+
         this_thread::sleep_for(1s);
-        auto t = stopSource.get_token();
 		do
 		{
-			auto s = server.WaitClients(t);
-            if (s==nullptr)
-            {
-                logError("Error wait client");
-            }
-            log("Add context to stack");
-			stack.AddContext(std::move(s));
-		}
-		while(!t.stop_requested());
+			auto context = server.WaitClients(token);
+			stack.AddContext(std::move(context));
+        }
+		while(!token.stop_requested());
 
         for (auto &&t: threads)
         {
+            t.request_stop();
             t.join();
         }
 

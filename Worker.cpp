@@ -161,13 +161,20 @@ void Worker (std::stop_token st, const ThreadSafeStack& stack, const std::string
         {
             //std::cout << "get context" << std::endl;
             auto context = stack.GetContext(st);
-            if (st.stop_requested())
-                return;
 
-            if (context==nullptr)
-                continue; 
+            if (!context)
+            {
+                auto err = context.error();
+                if (err==ThreadStackErr::TIMEOUT)
+                    continue;
+                else
+                {
+                    log("Close thread");
+                    break;
+                }
+            }
 
-            auto socket = context->GetSocket();
+            auto socket = (*context)->GetSocket();
             if (socket==nullptr)
                 continue;
 

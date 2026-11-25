@@ -16,21 +16,27 @@ void ThreadSafeStack::AddContext(std::unique_ptr<IOContext> i)
 	cv.notify_one();
 }
 
- std::unique_ptr<IOContext> ThreadSafeStack::GetContext(std::stop_token st) const
-{
+std::expected<std::unique_ptr<IOContext>, ThreadStackErr> ThreadSafeStack::GetContext(std::stop_token st) const
+{ 
+    if (st.stop_requested())
+    {
+        logError("Program was interrupted");
+        return std::unexpected(ThreadStackErr::INTERRUPTED);
+    }
+
+
 	std::unique_lock lock(m_mutex);
-	cv.wait_for(lock, st, 5s, [this]{return !m_stack.empty();});
+	cv.wait_for(lock, st, 5s, [this, st]{return !m_stack.empty() || st.stop_requested();});
 
     if (st.stop_requested())
     {
-        logError("Program was interupted");
-        return nullptr;
+        logError("Program was interrupted");
+        return std::unexpected(ThreadStackErr::INTERRUPTED);
     }
 
     if (m_stack.empty())
     {
-        //logError("Stack empty");
-        return nullptr;
+        return std::unexpected(ThreadStackErr::TIMEOUT);
     }
 
 	auto s = std::move(m_stack.top());

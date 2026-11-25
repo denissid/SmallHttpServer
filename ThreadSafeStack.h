@@ -7,7 +7,13 @@
 #include <condition_variable>
 #include <memory>
 #include <stop_token>
+#include <expected>
 
+enum class ThreadStackErr
+{
+    INTERRUPTED,
+    TIMEOUT
+};
 
 class ThreadSafeStack
 {
@@ -20,7 +26,7 @@ class ThreadSafeStack
 		ThreadSafeStack() = default;
 
 		void AddContext(std::unique_ptr<IOContext> context);
-		std::unique_ptr<IOContext>  GetContext(std::stop_token st) const;
+        std::expected<std::unique_ptr<IOContext>, ThreadStackErr>  GetContext(std::stop_token st) const;
 
 		~ThreadSafeStack();
 
